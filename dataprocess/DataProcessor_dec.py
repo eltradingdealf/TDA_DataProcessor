@@ -1,0 +1,352 @@
+#!/usr/bin/env python
+""" Clase principal para el proceso de ticks de
+    los datos de futuros CME con precios en formato decimal
+
+    -REcorre la lista de ticks obtenida de la BD
+    -actualiza los datos globales de session
+    -Calcula los datos de los periodos.
+
+    @author Alfredo Sanz
+    @date Marzo 2019
+"""
+
+#APIs imports
+import logging
+import logging.config
+import time
+from decimal import Decimal, ROUND_HALF_UP
+import numpy as np
+
+#local imports
+from dataprocess.DataProcessor import DataProcessor
+from model.Dec_data import Dec_data
+from model.Singleton_DataTemp_Dec import Singleton_DataTemp_Dec
+from model.Tick_Dec import Tick_Dec
+from common import Constantes
+from dataprocess import DataProcessor_util
+
+
+
+
+class DataProcessor_dec(DataProcessor):
+
+    dataSingleton = Singleton_DataTemp_Dec()
+
+    """
+    * Constructor
+    *
+    * Carga el Manejador de Logging
+    """
+    def __init__(self):
+
+        logging.config.fileConfig('logging.conf')
+        self.logger = logging.getLogger('PYDACALC')
+    #construct
+
+
+
+    """
+    * Esta funcion Realiza la funcion de calculo usando
+    * los datos actuales y los nuevos recibidos, actualizando
+    * al finalizar el repositorio de datos actuales, disponibles
+    * para ser enviados al Host cuando sea necesario.
+    """
+    def __update_global_data(self, _vol_tmp, 
+                                  _vol_buy_tmp, 
+                                  _vol_sell_tmp, 
+                                  _last_buy_price,
+                                  _last_sell_price,
+                                  _profile_vol_tmp):
+
+        errormessage = '0'
+
+        decData = self.dataSingleton.decData
+
+        try:
+            #*****PRICE
+            if _last_buy_price:
+                decData.current_buy_price = _last_buy_price
+            #
+            if _last_sell_price:
+                decData.current_sell_price = _last_sell_price
+            #
+
+            #*****VOLUME
+            if _vol_tmp:
+                decData.total_vol_sess += _vol_tmp
+            #
+            if _vol_buy_tmp:
+                decData.total_buy_vol_sess += _vol_buy_tmp
+            #
+            if _vol_sell_tmp:
+                decData.total_sell_vol_sess += _vol_sell_tmp
+            #
+
+            #VOLUME PROFILE TOTAL
+            for vpkey in _profile_vol_tmp.keys(): 
+                vp_vol = decData.total_volumeprofile_dict.get(vpkey)
+
+                if vp_vol:
+                    vp_vol += _profile_vol_tmp[vpkey]
+                else:
+                    vp_vol = _profile_vol_tmp[vpkey]
+                #
+
+                decData.total_volumeprofile_dict[vpkey] = vp_vol
+            #for
+
+            self.logger.debug('decData.total_volumeprofile_dict=' + repr(decData.total_volumeprofile_dict))
+
+           
+            #**VOLUME DELTA**
+            self.logger.debug("Calculating delta")
+            errormessageD1, d1 = DataProcessor_util.calcDelta(decData.total_buy_vol_sess,
+                                                              decData.total_sell_vol_sess,
+                                                              self.logger)
+
+            if '0' == errormessageD1:
+                decData.acum_delta_sess = d1
+            else:
+                errormessage = errormessageD1
+            #
+
+            #**VOLUME DELTA-F**
+            self.logger.debug('Calculating delta-F: decData.acum_delta_sess=' + str(decData.acum_delta_sess) + ',  decData.total_vol_sess=' + str( decData.total_vol_sess))
+            errormessageD2, dF  = DataProcessor_util.calcDelta_F(decData.acum_delta_sess, 
+                                                               decData.total_vol_sess, 
+                                                               self.logger)
+
+            if '0' == errormessageD2:
+                decData.acum_deltaF_sess = dF
+            else:
+                errormessage = errormessageD2
+            #
+
+        except Exception as ex:
+            self.logger.error(repr(ex.args))
+            self.logger.exception(ex)
+            errormessage = '++--++Error updating global data in Singleton: ' + repr(ex)
+
+        return errormessage
+    #fin __update_global_data
+
+
+
+    """
+    * Procesa la lista de Ticks de los datos aniadidos a la BBDD
+    * desde la ultima consulta.
+    * La lista de entrada necesita estar ordenada por que actualizamos
+    * el precio actual.
+    """
+    def __process_tickList_forGlobal(self, _tickList, _errormessage_list):
+
+        self.logger.debug('***Method->__process_tickList_forGlobal tick(for Global): Length tickList='+ str(len(_tickList)) + ' INIT')
+        last_ID = '0'
+
+        vol_tmp = 0
+        vol_buy_tmp = 0
+        vol_sell_tmp = 0
+        last_buy_price = 0
+        last_sell_price = 0
+        profile_vol_tmp = {}
+
+        tckProcessed = 0
+        for tick in _tickList:
+
+            try:
+                last_ID = tick.ID
+                vol_tmp += tick.trade_vol
+                self.logger.debug("Process tick(for Global): vol_tmp="+ str(vol_tmp))
+                self.logger.debug("Process tick(for Global): tick_ope="+ str(tick.ope))
+
+                #VOLUME
+                if Constantes.TICK_OPE_BUY == tick.ope:
+                    vol_buy_tmp += tick.trade_vol
+                #
+                elif Constantes.TICK_OPE_SELL == tick.ope:
+                    vol_sell_tmp += tick.trade_vol
+                #
+                self.logger.debug("Process tick(for Global): vol_buy_tmp="+ str(vol_buy_tmp) + ", vol_sell_tmp=" + str(vol_sell_tmp))
+
+                #PRICE
+                last_buy_price = tick.buy_price
+                last_sell_price = tick.sell_price                          
+                self.logger.debug("Process tick(for Global): last_buy_price:" + str(last_buy_price))
+                self.logger.debug("Process tick(for Global): last_sell_price:" + str(last_sell_price))
+
+                #VOLUME PROFILE TEMP
+                item_volprof = profile_vol_tmp.get(str(tick.trade_price))
+                if item_volprof:
+                    item_volprof += tick.trade_vol
+                    profile_vol_tmp[str(tick.trade_price)] = item_volprof
+                else:
+                    profile_vol_tmp[str(tick.trade_price)] = tick.trade_vol
+                #
+
+            except Exception as ex:
+                self.logger.error(repr(ex.args))
+                self.logger.exception(ex)
+                _errormessage_list.append('++--++do Loop Processing ticks(for Global) Error: ' + repr(ex))
+            #
+
+            tckProcessed += 1
+        #for
+
+        
+        if 0 < tckProcessed:
+            #CON TODOS LOS TICKS SUMADOS -> CALCULAMOS VALORES GLOBALES
+            errormessage = self.__update_global_data(vol_tmp, 
+                                                    vol_buy_tmp, 
+                                                    vol_sell_tmp, 
+                                                    last_buy_price,
+                                                    last_sell_price,
+                                                    profile_vol_tmp)
+
+            if '0' != errormessage:
+                _errormessage_list.append(errormessage)
+            #
+        #if
+        
+
+        self.logger.debug('***Method->__process_tickList_forGlobal tick(for Global) Before update: vol_buy_tmp='+ str(vol_buy_tmp) + ', vol_sell_tmp=' + str(vol_sell_tmp) + ' ENDS')
+        return _errormessage_list, last_ID, tckProcessed
+    #fin __process_tickList_forGlobal
+
+
+
+    """
+    * Procesa la lista de Ticks de los datos aniadidos a la BBDD
+    * desde la ultima consulta.
+    """
+    def __process_tickList(self, _tickList, _market, _errormessage_list):
+
+        self.logger.debug('***Method->__process_tickList: Length tickList='+ str(len(_tickList)) + ' INIT')
+
+        tckProcessed = 0
+        decData = self.dataSingleton.decData
+        decData.initArrays(_market)
+
+        maxColIndex = 0
+        if Constantes.MARKET_EUROFX == _market:
+            maxColNumber = Constantes.MARKET_EUROFX_TICKS_BY_CANDLE
+
+        elif Constantes.MARKET_SP500 == _market:
+            maxColNumber = Constantes.MARKET_SP500_TICKS_BY_CANDLE
+
+        elif Constantes.MARKET_NASDAQ == _market:
+            maxColNumber = Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE
+        #
+
+
+        for tick in _tickList:
+
+            try:
+                #check if tmp array is full
+                self.logger.debug("Process __process_tickList: maxColNumber="+ str(maxColNumber) + 'decData.arrays_index='+ str(decData.arrays_index))
+                if maxColNumber <= decData.arrays_index:
+                    decData.concatenateRowsTmp(_market)
+                #
+
+
+                #store vol
+                self.logger.debug("Process __process_tickList: tick_ope="+ str(tick.ope))
+                if Constantes.TICK_OPE_BUY == tick.ope:
+                    decData.volume_ndArray_tmp[0, decData.arrays_index] = tick.trade_vol
+                #
+                elif Constantes.TICK_OPE_SELL == tick.ope:
+                    decData.volume_ndArray_tmp[0, decData.arrays_index] = -1 * tick.trade_vol
+                #
+                #positive vol == buy, negative vol == sell
+                self.logger.debug("Process __process_tickList: tick vol="+ str(decData.volume_ndArray_tmp[0, decData.arrays_index]))
+                
+
+                #CALC DELTA OF CURRENT CANDLE
+                b = 0
+                s = 0
+                for x in range(decData.arrays_index + 1):
+                    v = decData.volume_ndArray_tmp[0, x]
+                    if v >= 0:
+                        b += v
+                    else:
+                        s += v
+                    #
+                #
+                self.logger.debug("Process __process_tickList: s="+ str(s) + ', b=' + str(b))
+                errormessageD1, delta = DataProcessor_util.calcDelta(b, (s * -1), self.logger)
+                delta_dec = Decimal(delta)
+                delta_dec = Decimal(delta_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
+                decData.calculatedData_ndArray[0,  decData.calculatedData_index] = delta_dec
+                self.logger.debug("Process __process_tickList: delta="+ str(delta_dec))
+
+
+                #CALC AVG VOL OF CURRENT CANDLE
+                self.logger.debug("Process __process_tickList: volume_ndArray_tmp="+ repr(decData.volume_ndArray_tmp))
+                arTmp = np.absolute(decData.volume_ndArray_tmp[0, :decData.arrays_index + 1])
+                avg_vol = np.mean(arTmp)
+                avg_vol_dec = Decimal(avg_vol)
+                avg_vol_dec = Decimal(avg_vol_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
+                decData.calculatedData_ndArray[1, decData.calculatedData_index] = avg_vol_dec
+                self.logger.debug("Process __process_tickList: avg_vol_dec="+ str(avg_vol_dec))
+
+
+                #CALC DELTA STRONG OF CURRENT CANDLE
+                strong_dec = Decimal(avg_vol_dec * delta_dec)                
+                strong_dec = Decimal(strong_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
+                
+                #copy_sign(other, context=None) -> Return a copy of the first operand with the sign set to be the same as the sign of the second operand. For example: Decimal('2.3').copy_sign(Decimal('-1.5')) --> Decimal('-2.3')
+                strong_dec_signal = strong_dec.copy_sign(delta_dec)
+
+                decData.calculatedData_ndArray[2,  decData.calculatedData_index] = strong_dec_signal
+                self.logger.debug("Process __process_tickList: strong_dec="+ str(strong_dec_signal))
+
+                decData.arrays_index += 1
+
+                
+                self.logger.debug('Process __process_tickList: calculatedData_ndArray:'+repr(decData.calculatedData_ndArray))
+
+            except Exception as ex:
+                self.logger.error(repr(ex.args))
+                self.logger.exception(ex)
+                _errormessage_list.append('++--++do Loop Processing __process_tickList Error: ' + repr(ex))
+            #
+        #for
+
+        self.logger.debug('***Method->__process_tickList __process_tickList ENDS')
+        return _errormessage_list
+    #fin __process_tickList
+
+
+
+    """
+    * Procesa una lista de ticks de datos de Fut_Dec
+    *
+    * @param _ticklistDict dict{List<Tick_dec>} Dictionary con las Listas de ticks de un futuro CME
+    *                           {ticklist_ID | list}
+    *
+    * @return errormessage_list  lista de Strings con mensajes de error durante el proceso
+    *         last_ID   string con el ID del ultimop Tick
+    """
+    def doProcess(self, _ticklistDict, _thetime, _market):
+        """  return errormessage_list [str], last_ID <int> """
+        
+        self.logger.info('***Method->doProcess tick list '+_market+' INIT')
+
+        errormessage = '0'
+        errormessage_list = []
+        last_ID = '0'
+
+        try:
+            errormessage_list, last_ID, n1 = self.__process_tickList_forGlobal(_ticklistDict['ticklist_ID'], errormessage_list)
+            
+            errormessage_list = self.__process_tickList(_ticklistDict['ticklist_ID'], _market, errormessage_list)
+
+        except Exception as ex:
+            self.logger.error(repr(ex.args))
+            self.logger.exception(ex)
+            errormessage = '++--++do Processing ticks Error: ' + repr(ex)
+            errormessage_list.append(errormessage)
+
+        self.logger.info('***Method->doProcess tick list '+_market+' ENDS')
+        return errormessage_list, last_ID
+    #fin doProcess
+#class

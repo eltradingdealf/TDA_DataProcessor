@@ -1,0 +1,13 @@
+
+*.pyc
+*.pyman
+*.pyo
+*.db
+
+__pycache__
+/result-files/
+/.vscode/
+
+ConfigRootAux.py
+rc_file.txt
+python
