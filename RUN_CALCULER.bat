@@ -1,5 +1,5 @@
 echo off
 
-C:\DEV\python372\python --version
+C:\DEV\python3\python --version
 
-call C:\DEV\python372\python MainApp.py
+call C:\DEV\python3\python MainApp.py
