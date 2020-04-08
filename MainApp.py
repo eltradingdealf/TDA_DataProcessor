@@ -15,8 +15,8 @@ import logging.config
 from common import Constantes
 
 #local imports
-from ETDA_IBEX_DataProcess import ETDA_ibex_DataProcess
-from ETDA_Dec_DataProcess import ETDA_Dec_DataProcess
+from ETDA_Ibex_Engine import ETDA_ibex_Engine
+from ETDA_Dec_Engine import ETDA_Dec_Engine
 from StopProcessCondition import StopProcessConditionSingleton
 
 
@@ -39,8 +39,8 @@ class MainApp(cmd.Cmd):
         logging.config.fileConfig('logging.conf')
         self.logger = logging.getLogger('PYDACALC2')
 
-        self.ibexDataProcess = ETDA_ibex_DataProcess()
-        self.decimal_DataProcess = ETDA_Dec_DataProcess()
+        self.ibexDataProcess = ETDA_ibex_Engine()
+        self.decimal_DataProcess = ETDA_Dec_Engine()
     #construct
 
 
