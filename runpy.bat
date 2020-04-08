@@ -1,6 +1,6 @@
 echo off
 
-C:\DEV\python372\python --version
-rem C:\DEV\python372\python
+C:\DEV\python3\python --version
 
-call C:\DEV\python372\python %1
+
+call C:\DEV\python3\python %1
