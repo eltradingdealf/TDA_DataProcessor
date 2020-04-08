@@ -27,7 +27,7 @@ from common import Constantes
 from common import MyCalendar
 from model.Dec_data import Dec_data
 
-class ETDA_Dec_DataProcess:
+class ETDA_Dec_Engine:
 
     dataSingleton = Singleton_DataTemp_Dec()
     spc = StopProcessConditionSingleton()

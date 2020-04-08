@@ -28,7 +28,7 @@ from common import MyCalendar
 from restclient.RestDIO_ibex import RestDIO_Ibex 
 from model.Ibex_data import Ibex_data
 
-class ETDA_ibex_DataProcess:
+class ETDA_ibex_Engine:
 
     dataSingleton = Singleton_DataTemp()
     spc = StopProcessConditionSingleton()
