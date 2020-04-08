@@ -2,13 +2,13 @@
 """ Proceso principal para el procesamiento de
     los datos del futuro del Euro. CME market.
 
-    -Obtiene datos de la BD
-    -Calcula datos
-    -Guarda o envía los datos calculados para su consumo por
-    otro soft.
+    -Obtiene los ultimos datos depositados en la BD
+    -Los envia al calulador
+    -Guarda o envía los resultados calculados para su consumo por otro soft.
 
     @author Alfredo Sanz
     @date Marzo 2019
+    @update 2020
 """
 
 #APIs imports
@@ -307,7 +307,6 @@ class ETDA_Dec_Engine:
                 if False == self.isTradingON:
                     self.logger.info('***LOOP*** Trading ON: False, wait 60 sec')
                     time.sleep(60)
-                    opcount = 0
 
                     continue
                 #
@@ -327,8 +326,6 @@ class ETDA_Dec_Engine:
                 errMesgGetTicks, ticklistDict = self.__getTickListsFromDB(last_tick_id, thetime['intDate'], thetime['dtdt'], _market)
                 if '0' != errMesgGetTicks:
                     getTicksErrorMsgList.append(errMesgGetTicks)
-
-                    continue
                 #
                 self.logger.info('***LOOP*** **TIME TRAP: QUERY DB ends')
 
