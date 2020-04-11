@@ -63,7 +63,6 @@ class ETDA_Dec_Engine:
         self.logger.info('***Method->__getTickListsFromDB '+_market+' INIT')
 
         errormessage1 = '0'
-        errormessage2 = '0'
         errormessage  = '0'
         result = {}
         dao_mysql = Dec_mysql_Dao()
@@ -236,7 +235,7 @@ class ETDA_Dec_Engine:
         #CHECKING OPEN MARKET
         if 'S' == today_calendar[0]:
             self.logger.debug('today_calendar[0]==============S')
-            if hourofday >= today_calendar[1] and hourofday < today_calendar[2]:
+            if today_calendar[1] <= hourofday < today_calendar[2]:
 
                 self.logger.debug('today_calendar[1]==============S')    
                 self.isTradingON = True
@@ -283,9 +282,6 @@ class ETDA_Dec_Engine:
         generalErrorMesgList = []
         
         last_tick_id = '0'
-        deliveryID = Util.generateDateTimeBasedKey()  #id que se usara para el registro de datos        
-        deliveryID_vp = Util.generateDateTimeBasedKey()  #id que se usara para el registro de datos
-
         dao_mysql = Dec_mysql_Dao()
 
         dap = DataProcessor_dec()
@@ -293,7 +289,7 @@ class ETDA_Dec_Engine:
         calculatedData_index_last = 0
 
         #--++--MAIN PROCESS LOOP
-        while False == self.spc.stopProcessFlag:
+        while not self.spc.stopProcessFlag:
 
             try:
                 #Check Conditions for Loop Exit
@@ -304,7 +300,7 @@ class ETDA_Dec_Engine:
 
                 #check Calendar, Ensuring that we are within Open market hours
                 self.__checkCalendar(_market)
-                if False == self.isTradingON:
+                if not self.isTradingON:
                     self.logger.info('***LOOP*** Trading ON: False, wait 60 sec')
                     time.sleep(60)
 
