@@ -371,9 +371,89 @@ class Dec_mysql_Dao(iDecDAO):
 
 
 
+    def blankTables(self, _market):
+
+        self.logger.info('***Method->Dao-ibex->blankTables INIT')
+
+        errormessage = '0'
+        result = []
+        connection = None
+
+        try:
+            self.logger.info('=====mysql, DELETE DATA IN TICKS TABLE FOR MARKET: ' + _market)
+            connection = pymysql.connect(host="127.0.0.1",
+                                         port=3306,
+                                         user=ConfigRoot.db_mariadb_user,
+                                         passwd=ConfigRoot.db_mariadb_pass,
+                                         db="trading_db",
+                                         charset='utf8',
+                                         cursorclass=pymysql.cursors.DictCursor)
+
+            sql_delete = ''
+            if Constantes.MARKET_EUROFX == _market:
+                sql_delete = query_sql.DELETE_TICKS_DEC_EUROFX
+            elif Constantes.MARKET_SP500 == _market:
+                sql_delete = query_sql.DELETE_TICKS_DEC_SP500
+            elif Constantes.MARKET_NASDAQ == _market:
+                sql_delete = query_sql.DELETE_TICKS_DEC_NASDAQ
+            #
+
+            cursor2 = connection.cursor()
+            cursor2.execute(sql_delete)
+
+            self.logger.info('=====mysql, DELETE TICKS ENDS, query=' + str(sql_delete))
+
+        finally:
+            if connection:
+                connection.commit()
+            #
+            if connection:
+                connection.close()
+            #
+        #
+
+        try:
+            self.logger.info('=====mysql, DELETE DATA IN VISU-DATACALC TABLE FOR MARKET: ' + _market)
+            connection = pymysql.connect(host="127.0.0.1",
+                                         port=3306,
+                                         user=ConfigRoot.db_mariadb_user,
+                                         passwd=ConfigRoot.db_mariadb_pass,
+                                         db="trading_db",
+                                         charset='utf8',
+                                         cursorclass=pymysql.cursors.DictCursor)
+
+            sql_delete_02 = ''
+            if Constantes.MARKET_EUROFX == _market:
+                sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_EUROFX
+            elif Constantes.MARKET_SP500 == _market:
+                sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_SP500
+            elif Constantes.MARKET_NASDAQ == _market:
+                sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_NASDAQ
+            #
+
+            cursor2 = connection.cursor()
+            cursor2.execute(sql_delete_02)
+
+            self.logger.info('=====mysql, DELETE VISU-DATACALC ENDS, query=' + str(sql_delete_02))
+
+        finally:
+            if connection:
+                connection.commit()
+            #
+            if connection:
+                connection.close()
+            #
+        #
+
+        self.logger.info('***Method->Dao-Dec->blankTables ENDS')
+        return errormessage
+    # fin blankTables
+
+
+
     """
-    * Hace el backup de los datos de una sesion en Mongodb y los elimina
-    * de la coleccion principal.
+    * Hace el backup de las tablas de ticks de las sesiones anteriores,
+    * y borra todo de las tablas de visualizacion
     *
     * @param _idSesion La sesion que queremos copiar y guardar.
     """

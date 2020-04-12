@@ -89,6 +89,7 @@ SELECT_INSERT_TICKS_BACKP_DEC_EUROFX_02 =   """ (ID, tickdate, ticktime, tickmil
 
 
 DELETE_TICKS_BY_SESION_DEC_EUROFX =       'DELETE FROM trading_db.ticks_feuro WHERE tickdate=%s'
+DELETE_TICKS_DEC_EUROFX =       'DELETE FROM trading_db.ticks_feuro'
 
 
 CREATE_TABLE_BACKUP_TICKS_DEC_SP500_01 =  'CREATE TABLE IF NOT EXISTS ' + TABLE_NAME_TICKS_BACKUP_DEC_SP500 + '_'
@@ -128,6 +129,7 @@ SELECT_INSERT_TICKS_BACKP_DEC_SP500_02 =   """ (ID, tickdate, ticktime, tickmili
 
 
 DELETE_TICKS_BY_SESION_DEC_SP500 =            'DELETE FROM trading_db.ticks_fsp500 WHERE tickdate=%s '
+DELETE_TICKS_DEC_SP500 =            'DELETE FROM trading_db.ticks_fsp500 '
 
 
 
@@ -168,6 +170,7 @@ SELECT_INSERT_TICKS_BACKP_DEC_NASDAQ__02 =   """ (ID, tickdate, ticktime, tickmi
 
 
 DELETE_TICKS_BY_SESION_DEC_NASDAQ =            'DELETE FROM trading_db.ticks_fnasdaq WHERE tickdate=%s '
+DELETE_TICKS_DEC_NASDAQ =            'DELETE FROM trading_db.ticks_fnasdaq '
 
 
 

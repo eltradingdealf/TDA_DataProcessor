@@ -11,13 +11,14 @@
     @update 2020
 """
 
-#APIs imports
+# APIs imports
 import logging
 import logging.config
 import time
 from decimal import *
 
-#local imports
+
+# local imports
 from StopProcessCondition import StopProcessConditionSingleton
 from dao.Dec_mysql_Dao import Dec_mysql_Dao
 from dataprocess.DataProcessor_dec import DataProcessor_dec
@@ -25,7 +26,7 @@ from model.Singleton_DataTemp_Dec import Singleton_DataTemp_Dec
 from common import Util
 from common import Constantes
 from common import MyCalendar
-from model.Dec_data import Dec_data
+
 
 class ETDA_Dec_Engine:
 
@@ -34,7 +35,7 @@ class ETDA_Dec_Engine:
 
     isTradingON = False
 
-    #Global errors Lists
+    # Global errors Lists
     ge_getticks_errormessage_list = []
     ge_procestick_errormessage_list = []
     ge_general_errormessage_list = []
@@ -48,7 +49,7 @@ class ETDA_Dec_Engine:
 
         logging.config.fileConfig('logging.conf')
         self.logger = logging.getLogger('PYDACALC')
-    #construct
+    # construct
 
 
     
@@ -67,7 +68,7 @@ class ETDA_Dec_Engine:
         result = {}
         dao_mysql = Dec_mysql_Dao()
 
-        #TICK LIST AFTER LAST QUERY EXECUTION
+        # TICK LIST AFTER LAST QUERY EXECUTION
         try:
             errormessage1, tick_id_list = dao_mysql.getListTicks_LastByID(_last_tick_id, _curTimeInDate, _market)
             if '0' == errormessage1:
@@ -87,7 +88,7 @@ class ETDA_Dec_Engine:
 
         self.logger.info('***Method->__getTickListsFromDB '+_market+' ENDS')
         return errormessage, result
-    #fin __getTickListsFromDB
+    # fin __getTickListsFromDB
 
 
 
@@ -108,12 +109,11 @@ class ETDA_Dec_Engine:
         except Exception as ex:
             self.logger.error(repr(ex.args))
             self.logger.exception(ex)
-            errormessage = errormessage + ' - ' + '++--++Error In Decimal future  '+_market+'  __updateCurrentPrices: ' + repr(ex)
+            self.logger.error(errormessage + ' - ' + '++--++Error In Decimal future  '+_market+'  __updateCurrentPrices: ' + repr(ex))
         #
 
         self.logger.info('***Method->__updateCurrentPrices '+_market+' ENDS')
-    #fin __updateCurrentPrices
-
+    # fin __updateCurrentPrices
 
 
     
@@ -161,18 +161,18 @@ class ETDA_Dec_Engine:
         _getTicksErrorMsgList[:] = []
         _processTicksErrorMsgList[:] = []
         _generalErrorMesgList[:] = []
-    #fin printErrors
+    # fin printErrors
 
 
 
     def __checkExitConditions(self):
 
-        #Exit by Flag
+        # Exit by Flag
         if True == self.spc.stopProcessFlag:
             return True
         #
 
-        #Exit by Errors
+        # Exit by Errors
         """
         total_err = len(self.ge_getticks_errormessage_list) + len(self.ge_procestick_errormessage_list) + len(self.ge_senddata_errormessage_list) + len(self.ge_general_errormessage_list)
         if 50 <= total_err:
@@ -182,7 +182,7 @@ class ETDA_Dec_Engine:
         #
         """
         return False
-    #fin __checkExitConditions
+    # fin __checkExitConditions
 
 
 
@@ -198,6 +198,11 @@ class ETDA_Dec_Engine:
             return
         #
 
+        errormessage = dao_mysql.blankTables(_market)
+        if '0' != errormessage:
+            self.logger.info('Error deleting data in local Database  ' + _market + ' : ' + errormessage)
+        #
+        """
         for sesion in sesion_list:
             #backup DB local
             errormessage = dao_mysql.backupSession(sesion, _market)
@@ -205,13 +210,14 @@ class ETDA_Dec_Engine:
                 self.logger.info('Error Backing up Session in local Database  '+_market+' : ' + errormessage)
             #
         #for
+        """
 
-        #ZERO for acumulated fields
+        # ZERO for acumulated fields
         decData = self.dataSingleton.decData
         decData.setZeroAcumulatedFields()
 
         self.logger.info('***Method->Backup and Delete '+_market+' ENDS')
-    #fin __doBackupAndDelete
+    # fin __doBackupAndDelete
 
 
 
@@ -232,7 +238,7 @@ class ETDA_Dec_Engine:
                         backup_done int<0/1>
         """
 
-        #CHECKING OPEN MARKET
+        # CHECKING OPEN MARKET
         if 'S' == today_calendar[0]:
             self.logger.debug('today_calendar[0]==============S')
             if today_calendar[1] <= hourofday < today_calendar[2]:
@@ -248,7 +254,7 @@ class ETDA_Dec_Engine:
             self.isTradingON = False
         #
 
-        #MAKE BACKUP
+        # MAKE BACKUP
         if 'S' == today_calendar[0]:
             self.logger.debug('today_calendar[0],BCKUP========S')
             if 0 == today_calendar[3]:
@@ -257,8 +263,7 @@ class ETDA_Dec_Engine:
                 today_calendar[3] = 1
             #
         #
-    #fin __checkCalendar
-
+    # fin __checkCalendar
 
 
     
@@ -288,17 +293,17 @@ class ETDA_Dec_Engine:
         decData = self.dataSingleton.decData
         calculatedData_index_last = 0
 
-        #--++--MAIN PROCESS LOOP
+        # --++--MAIN PROCESS LOOP
         while not self.spc.stopProcessFlag:
 
             try:
-                #Check Conditions for Loop Exit
+                # Check Conditions for Loop Exit
                 _check = self.__checkExitConditions()
                 if _check:
                     break
                 #
 
-                #check Calendar, Ensuring that we are within Open market hours
+                # check Calendar, Ensuring that we are within Open market hours
                 self.__checkCalendar(_market)
                 if not self.isTradingON:
                     self.logger.info('***LOOP*** Trading ON: False, wait 60 sec')
@@ -309,7 +314,7 @@ class ETDA_Dec_Engine:
 
                
 
-                #INIT ITERATION WAITING A TIME'S INTERVAL
+                # INIT ITERATION WAITING A TIME'S INTERVAL
                 self.logger.info('***LOOP*** INIT ITERATION, Awaiting 0.5 secs')
                 time.sleep(Constantes.TIME_LOOP_TOSLEEP)
                 self.logger.info('***LOOP*** ITERATION STARTED')
@@ -318,7 +323,7 @@ class ETDA_Dec_Engine:
 
 
 
-                #--++--GET TICK LIST FROM BROKER MESSAGE DATABASE
+                # --++--GET TICK LIST FROM BROKER MESSAGE DATABASE
                 errMesgGetTicks, ticklistDict = self.__getTickListsFromDB(last_tick_id, thetime['intDate'], thetime['dtdt'], _market)
                 if '0' != errMesgGetTicks:
                     getTicksErrorMsgList.append(errMesgGetTicks)
@@ -327,23 +332,23 @@ class ETDA_Dec_Engine:
 
 
 
-                #--++--PROCESS TICKS LIST
+                # --++--PROCESS TICKS LIST
                 processTicksErrorMsgListOrig, last_tick_id_tmp = dap.doProcess(ticklistDict, thetime, _market)
                 if 0 < len(processTicksErrorMsgListOrig):
                     processTicksErrorMsgList.append(processTicksErrorMsgListOrig)
                 #
-                #Puede que en la iteracion no hubiese ticks nuevos, y el tickID vendra a '0'
+                # Puede que en la iteracion no hubiese ticks nuevos, y el tickID vendra a '0'
                 if '0' != last_tick_id_tmp:
                     last_tick_id = last_tick_id_tmp
                 else:
-                    #Si no ha habido nuevos Ticks, actualizamos el precio actual.
+                    # Si no ha habido nuevos Ticks, actualizamos el precio actual.
                     self.__updateCurrentPrices(thetime['intDate'], _market)
                 #
                 self.logger.info('***LOOP*** **TIME TRAP: PROCESS DATA('+str(last_tick_id)+') ends')
 
               
 
-                #STORE CALCULATED DATA INTO BROKER DATABASE                
+                # STORE CALCULATED DATA INTO BROKER DATABASE
                 self.logger.info('***LOOP***  **TIME TRAP **STORING CALCULATED DATA(calculatedData_index_last:'+str(calculatedData_index_last)+', decData.calculatedData_index:'+str(decData.calculatedData_index)+') init')
                 while calculatedData_index_last <= decData.calculatedData_index:
 
@@ -359,7 +364,7 @@ class ETDA_Dec_Engine:
                 
 
 
-                #STORE GLOBAL DATA INTO BROKER DATABASE
+                # STORE GLOBAL DATA INTO BROKER DATABASE
                 dao_mysql.updateGlobalData(_market, decData, thetime)
                 self.logger.debug('***LOOP***  **TIME TRAP **STORING GLOBAL DATA ends')
 
@@ -372,12 +377,10 @@ class ETDA_Dec_Engine:
                 self.logger.exception(ex)
                 generalErrorMesgList.append('++--++Error In Dec '+_market+' Main Loop: ' + repr(ex))
 
-            #imprime los errores de esta iteracion y vacia cada lista de errores para la siguiente
+            # imprime los errores de esta iteracion y vacia cada lista de errores para la siguiente
             self.__printErrors(errormessage, getTicksErrorMsgList, processTicksErrorMsgList, generalErrorMesgList, True)
-        #while
-
-        self.__printErrors(errormessage, ge_getticks_errormessage_list, ge_procestick_errormessage_list, self.ge_general_errormessage_list, False)
+        # while
 
         self.logger.info('***dowork '+_market+' ENDS')
-    #fin dowork
-#fin clase
+    # fin dowork
+# fin clase
