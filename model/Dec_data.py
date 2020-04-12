@@ -9,8 +9,6 @@
 #APIs imports
 import logging
 import logging.config
-import time
-import collections
 from decimal import *
 import numpy as np
 
@@ -19,7 +17,7 @@ from dataprocess import DataProcessor_util
 from common import Constantes
 
 
-class Dec_data():
+class Dec_data:
 
     """
     * Constructor
@@ -50,7 +48,7 @@ class Dec_data():
     ticks_array = [[]]
     ticks_array_tmp = []
 
-    volume_ndArray = np.zeros((1,1), dtype=int)
+    volume_ndArray = np.zeros((1, 1), dtype=int)
     volume_ndArray_tmp = np.zeros((1), dtype=int)
 
     arrays_initialized = False
@@ -63,7 +61,7 @@ class Dec_data():
     row 2 -> vol avg * vol delta
     One col by candle
     """
-    calculatedData_ndArray = np.zeros((3,1))
+    calculatedData_ndArray = np.zeros((3, 1))
     calculatedData_index = 0
     #---------------------------------------------
 
@@ -74,7 +72,7 @@ class Dec_data():
 
         self.logger.debug('***Method->initArrays  arrays_initialized='+str(self.arrays_initialized))
 
-        if False == self.arrays_initialized:        
+        if not self.arrays_initialized:
             self.logger.info('***Method->initArrays  arrays NOT initialized')
 
             if Constantes.MARKET_EUROFX == __market:
@@ -116,7 +114,7 @@ class Dec_data():
         self.arrays_index = 0
 
         #New Col for Calculated data array
-        tmp = np.zeros((3,1))
+        tmp = np.zeros((3, 1))
         self.calculatedData_ndArray = np.hstack((self.calculatedData_ndArray, tmp))
         self.calculatedData_index += 1
 
@@ -160,14 +158,13 @@ class Dec_data():
 
     def __str__(self):
 
-        result = 'IbexData{'
+        result = 'Dec_data{'
 
         result += 'current_buy_price=' + str(self.current_buy_price)
         result += ', current_sell_price=' + str(self.current_sell_price)
         result += ', total_vol_sess=' + str(self.total_vol_sess)
         result += ', total_buy_vol_sess=' + str(self.total_buy_vol_sess)
         result += ', total_sell_vol_sess=' + str(self.total_sell_vol_sess)
-        result += ', acum_delta_sess=' + str(self.acum_delta_sess)
         result += ', total_volumeprofile_dict=' + repr(self.total_volumeprofile_dict)
         result += ', tmp_volumeprofile_dict=' + repr(self.tmp_volumeprofile_dict)
 
