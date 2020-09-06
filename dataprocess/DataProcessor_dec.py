@@ -303,6 +303,8 @@ class DataProcessor_dec(DataProcessor):
 
         elif Constantes.MARKET_NASDAQ == _market:
             maxColNumber = Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE
+        elif Constantes.MARKET_DAX == _market:
+            maxColNumber = Constantes.MARKET_DAX_TICKS_BY_CANDLE
         #
 
         for tick in _tickList:
