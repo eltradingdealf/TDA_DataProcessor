@@ -4,6 +4,7 @@
 
     @author Alfredo Sanz
     @date Marzo 2019
+    @update Sept 2020
 """
 
 #APIs imports
@@ -79,6 +80,8 @@ class Dec_mysql_Dao(iDecDAO):
                     sql = query_sql.GET_CURRENT_PRICES_SP500
                 elif Constantes.MARKET_NASDAQ == _market:
                     sql = query_sql.GET_CURRENT_PRICES_NASDAQ
+                elif Constantes.MARKET_DAX == _market:
+                    sql = query_sql.GET_CURRENT_PRICES_DAX
                 #
 
                 cursor.execute(sql, (_curTimeInDate))
@@ -145,7 +148,6 @@ class Dec_mysql_Dao(iDecDAO):
             self.logger.debug('=====mysql, find_ID trap after conn')
 
             with connection.cursor() as cursor:
-                sql = query_sql.GET_LAST_TICKS_BY_ID_LIST
                 sql = ''
                 if Constantes.MARKET_EUROFX == _market:
                     sql = query_sql.GET_LAST_TICKS_BY_ID_LIST_EUROFX
@@ -153,6 +155,8 @@ class Dec_mysql_Dao(iDecDAO):
                     sql = query_sql.GET_LAST_TICKS_BY_ID_LIST_SP500
                 elif Constantes.MARKET_NASDAQ == _market:
                     sql = query_sql.GET_LAST_TICKS_BY_ID_LIST_NASDAQ
+                elif Constantes.MARKET_DAX == _market:
+                    sql = query_sql.GET_LAST_TICKS_BY_ID_LIST_DAX
                 #
 
                 cursor.execute(sql, (_curTimeInDate, _lastTick_id))
@@ -230,6 +234,8 @@ class Dec_mysql_Dao(iDecDAO):
                 sql = query_sql.SQL_INSERT_UPDATE_CALCULATED_DATA_SP500
             elif Constantes.MARKET_NASDAQ == __market:
                 sql = query_sql.SQL_INSERT_UPDATE_CALCULATED_DATA_NASDAQ
+            elif Constantes.MARKET_DAX == __market:
+                sql = query_sql.SQL_INSERT_UPDATE_CALCULATED_DATA_DAX
             #
             
             self.logger.debug('=====mysql, _calculatedData_ndArray=' + repr(_calculatedData_ndArray))
@@ -345,6 +351,8 @@ class Dec_mysql_Dao(iDecDAO):
                     sql = query_sql.GET_SESSION_LIST_SP500
                 elif Constantes.MARKET_NASDAQ == _market:
                     sql = query_sql.GET_SESSION_LIST_NASDAQ
+                elif Constantes.MARKET_DAX == _market:
+                    sql = query_sql.GET_SESSION_LIST_DAX
                 #
 
                 cursor.execute(sql)
@@ -396,6 +404,8 @@ class Dec_mysql_Dao(iDecDAO):
                 sql_delete = query_sql.DELETE_TICKS_DEC_SP500
             elif Constantes.MARKET_NASDAQ == _market:
                 sql_delete = query_sql.DELETE_TICKS_DEC_NASDAQ
+            elif Constantes.MARKET_DAX == _market:
+                sql_delete = query_sql.DELETE_TICKS_DEC_DAX
             #
 
             cursor2 = connection.cursor()
@@ -429,6 +439,8 @@ class Dec_mysql_Dao(iDecDAO):
                 sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_SP500
             elif Constantes.MARKET_NASDAQ == _market:
                 sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_NASDAQ
+            elif Constantes.MARKET_DAX == _market:
+                sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_DAX
             #
 
             cursor2 = connection.cursor()

@@ -171,6 +171,7 @@ SELECT_INSERT_TICKS_BACKP_DEC_NASDAQ__02 =   """ (ID, tickdate, ticktime, tickmi
 
 DELETE_TICKS_BY_SESION_DEC_NASDAQ =            'DELETE FROM trading_db.ticks_fnasdaq WHERE tickdate=%s '
 DELETE_TICKS_DEC_NASDAQ =            'DELETE FROM trading_db.ticks_fnasdaq '
+DELETE_TICKS_DEC_DAX =            'DELETE FROM trading_db.ticks_dax '
 
 
 
@@ -180,6 +181,8 @@ DELETE_VISU_CALCULATED_DATA_EUROFX =       'DELETE FROM trading_db.visu_datacalc
 DELETE_VISU_CALCULATED_DATA_SP500 =        'DELETE FROM trading_db.visu_datacalc_fsp500'
 
 DELETE_VISU_CALCULATED_DATA_NASDAQ =       'DELETE FROM trading_db.visu_datacalc_fnasdaq'
+
+DELETE_VISU_CALCULATED_DATA_DAX =       'DELETE FROM trading_db.visu_datacalc_dax'
 
 
 
@@ -272,6 +275,15 @@ GET_CURRENT_PRICES_NASDAQ =         """   SELECT tickdate,
                                           WHERE tickdate=%s
                                     """
 
+GET_CURRENT_PRICES_DAX =            """   SELECT tickdate,
+                                                ticktime,
+                                                tickmili, 
+                                                buy_price,
+                                                sell_price
+                                          FROM trading_db.prices_dax
+                                          WHERE tickdate=%s
+                                    """
+
 
 GET_SESSION_LIST_EUROFX =           """   SELECT DISTINCT(tickdate) as tickdate
                                           FROM trading_db.ticks_feuro
@@ -290,6 +302,10 @@ GET_SESSION_LIST_NASDAQ =           """   SELECT DISTINCT(tickdate) as tickdate
                                           ORDER BY tickdate ASC      
                                     """
 
+GET_SESSION_LIST_DAX =              """   SELECT DISTINCT(tickdate) as tickdate
+                                          FROM trading_db.ticks_dax 
+                                          ORDER BY tickdate ASC      
+                                    """
 
 GET_LAST_TICKS_BY_ID_LIST_EUROFX =  """   SELECT ID,
                                                 tickdate,
@@ -338,6 +354,22 @@ GET_LAST_TICKS_BY_ID_LIST_NASDAQ =  """   SELECT ID,
                                           ORDER BY ID ASC      
                                     """
 
+GET_LAST_TICKS_BY_ID_LIST_DAX =     """   SELECT ID,
+                                                tickdate,
+                                                ticktime,
+                                                tickmili, 
+                                                ope,
+                                                trade_price,
+                                                trade_vol,
+                                                buy_price,
+                                                sell_price
+                                          FROM trading_db.ticks_dax
+                                          WHERE tickdate=%s AND
+                                                ID >%s
+                                          ORDER BY ID ASC      
+                                    """
+
+
 SQL_INSERT_UPDATE_GLOBAL_DATA =     """   INSERT INTO trading_db.visu_global 
                                           (sessiondate, market, buy_price, sell_price, vprofile, volume_total) 
                                           VALUES(%s, %s, %s, %s, %s, %s) 
@@ -364,6 +396,15 @@ SQL_INSERT_UPDATE_CALCULATED_DATA_SP500 =      """   INSERT INTO trading_db.visu
 
 
 SQL_INSERT_UPDATE_CALCULATED_DATA_NASDAQ =      """   INSERT INTO trading_db.visu_datacalc_fnasdaq 
+                                                      (sessiondate, candle_id, delta, vol_avg, delta_strong) 
+                                                      VALUES(%s, %s, %s, %s, %s) 
+                                                      ON DUPLICATE KEY UPDATE 
+                                                      sessiondate=VALUES(sessiondate), candle_id=VALUES(candle_id), delta=VALUES(delta), 
+                                                      vol_avg=VALUES(vol_avg), delta_strong=VALUES(delta_strong)                                         
+                                                """
+
+
+SQL_INSERT_UPDATE_CALCULATED_DATA_DAX =         """   INSERT INTO trading_db.visu_datacalc_dax 
                                                       (sessiondate, candle_id, delta, vol_avg, delta_strong) 
                                                       VALUES(%s, %s, %s, %s, %s) 
                                                       ON DUPLICATE KEY UPDATE 

@@ -86,6 +86,10 @@ class Dec_data:
             elif Constantes.MARKET_NASDAQ == __market:
                 self.volume_ndArray = np.zeros((1, Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE), dtype=int)
                 self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE), dtype=int)
+            elif Constantes.MARKET_DAX == __market:
+                self.volume_ndArray = np.zeros((1, Constantes.MARKET_DAX_TICKS_BY_CANDLE), dtype=int)
+                self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_DAX_TICKS_BY_CANDLE), dtype=int)
+            #
             #
 
             self.arrays_initialized = True
@@ -110,6 +114,9 @@ class Dec_data:
 
         elif Constantes.MARKET_NASDAQ == __market:
             self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE), dtype=int)
+
+        elif Constantes.MARKET_DAX == __market:
+            self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_DAX_TICKS_BY_CANDLE), dtype=int)
         #
         self.arrays_index = 0
 

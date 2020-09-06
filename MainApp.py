@@ -6,6 +6,7 @@
     @author Alfredo Sanz
     @date Marzo 2019
     @version 2
+    @update sept 2020
 """
 
 #APIs imports
@@ -55,14 +56,14 @@ class MainApp(cmd.Cmd):
 
         self.spc.stopProcessFlag = False
         self.ibexDataProcess.dowork()
-    #do_start
+    #do_init
 
 
 
     """
     * Start reading and sending data for Euro-FX.
     """
-    def do_init_euroFX(self, arg):
+    def do_init_eurofx(self, arg):
         'Starts Process reading and sending data for Euro-FX'  #Comment for commands help
 
         self.logger.info('Main.do_start->Starting proccess')
@@ -71,8 +72,37 @@ class MainApp(cmd.Cmd):
         market = Constantes.MARKET_EUROFX
 
         self.decimal_DataProcess.dowork(market)
-    #do_start
+    #do_init_eurofx
 
+
+    """
+    * Start reading and sending data for S&P500.
+    """
+    def do_init_sp500(self, arg):
+        'Starts Process reading and sending data for S&P500'  #Comment for commands help
+
+        self.logger.info('Main.do_start->Starting proccess')
+
+        self.spc.stopProcessFlag = False
+        market = Constantes.MARKET_SP500
+
+        self.decimal_DataProcess.dowork(market)
+    #do_init_sp500
+
+
+    """
+    * Start reading and sending data for Euro-FX.
+    """
+    def do_init_dax(self, arg):
+        'Starts Process reading and sending data for DAX'  #Comment for commands help
+
+        self.logger.info('Main.do_start->Starting proccess')
+
+        self.spc.stopProcessFlag = False
+        market = Constantes.MARKET_DAX
+
+        self.decimal_DataProcess.dowork(market)
+    #do_init_dax
 
 
     """
