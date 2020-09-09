@@ -60,9 +60,10 @@ class Dec_data:
     row 1 -> vol avg
     row 2 -> vol avg * vol delta
     row 3 -> vol delta Period
+    row 4 -> vol Filtered
     One col by candle
     """
-    calculatedData_ndArray = np.zeros((4, 1))
+    calculatedData_ndArray = np.zeros((5, 1))
     calculatedData_index = 0
     #---------------------------------------------
 
@@ -125,7 +126,7 @@ class Dec_data:
         self.arrays_index = 0
 
         #New Col for Calculated data array
-        tmp = np.zeros((4, 1))
+        tmp = np.zeros((5, 1))
         self.calculatedData_ndArray = np.hstack((self.calculatedData_ndArray, tmp))
         self.calculatedData_index += 1
 
