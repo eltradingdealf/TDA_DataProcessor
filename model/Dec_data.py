@@ -49,7 +49,7 @@ class Dec_data:
     ticks_array_tmp = []
 
     volume_ndArray = np.zeros((1, 1), dtype=int)
-    volume_ndArray_tmp = np.zeros((1), dtype=int)
+    volume_ndArray_tmp = np.zeros(1, dtype=int)
 
     arrays_initialized = False
     arrays_index = 0
@@ -59,16 +59,18 @@ class Dec_data:
     row 0 -> vol delta
     row 1 -> vol avg
     row 2 -> vol avg * vol delta
+    row 3 -> vol delta Period
+    row 4 -> vol Filtered
     One col by candle
     """
-    calculatedData_ndArray = np.zeros((3, 1))
+    calculatedData_ndArray = np.zeros((5, 1))
     calculatedData_index = 0
     #---------------------------------------------
 
 
     def initArrays(self, __market):
 
-        self.logger.debug('***Method->initArrays  '+__market+' ENDS')
+        self.logger.debug('***Method->initArrays  '+__market+' INIT')
 
         self.logger.debug('***Method->initArrays  arrays_initialized='+str(self.arrays_initialized))
 
@@ -86,6 +88,7 @@ class Dec_data:
             elif Constantes.MARKET_NASDAQ == __market:
                 self.volume_ndArray = np.zeros((1, Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE), dtype=int)
                 self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE), dtype=int)
+
             elif Constantes.MARKET_DAX == __market:
                 self.volume_ndArray = np.zeros((1, Constantes.MARKET_DAX_TICKS_BY_CANDLE), dtype=int)
                 self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_DAX_TICKS_BY_CANDLE), dtype=int)
@@ -96,6 +99,8 @@ class Dec_data:
             self.arrays_index = 0
             self.logger.info('***Method->initArrays  arrays_index='+str(self.arrays_index)+ ' ENDS')
         #if
+
+        self.logger.debug('***Method->initArrays  ' + __market + ' ENDS')
     #
 
 
@@ -121,7 +126,7 @@ class Dec_data:
         self.arrays_index = 0
 
         #New Col for Calculated data array
-        tmp = np.zeros((3, 1))
+        tmp = np.zeros((5, 1))
         self.calculatedData_ndArray = np.hstack((self.calculatedData_ndArray, tmp))
         self.calculatedData_index += 1
 

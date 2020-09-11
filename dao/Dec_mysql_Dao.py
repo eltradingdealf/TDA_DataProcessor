@@ -242,7 +242,12 @@ class Dec_mysql_Dao(iDecDAO):
 
             with connection.cursor() as cursor:
                 self.logger.debug('=====mysql, query=' + sql)
-                cursor.execute(sql, (_theTime['intDate'], _index, str(_calculatedData_ndArray[0, _index]), str(_calculatedData_ndArray[1, _index]), str(_calculatedData_ndArray[2, _index])))
+                cursor.execute(sql, (_theTime['intDate'], _index,
+                                    str(_calculatedData_ndArray[0, _index]),
+                                    str(_calculatedData_ndArray[1, _index]),
+                                    str(_calculatedData_ndArray[2, _index]),
+                                    str(_calculatedData_ndArray[3, _index]),
+                                    str(_calculatedData_ndArray[4, _index])))
             #
             self.logger.debug('=====mysql, SQL_INSERT_UPDATE_CALCULATED_DATA_Fxxx query executed')
 

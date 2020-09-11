@@ -42,7 +42,7 @@ class DataProcessor_dec(DataProcessor):
 
 
     """
-    * Esta funcion Realiza la funcion de calculo usando
+    * Esta funcion realiza el calculo usando
     * los datos actuales y los nuevos recibidos, actualizando
     * al finalizar el repositorio de datos actuales, disponibles
     * para ser enviados al Host cuando sea necesario.
@@ -140,8 +140,7 @@ class DataProcessor_dec(DataProcessor):
 
     def __process_tickList_forGlobal(self, _tickList, _errormessage_list):
 
-        self.logger.debug('***Method->__process_tickList_forGlobal tick(for Global): Length tickList=' + str(
-            len(_tickList)) + ' INIT')
+        self.logger.debug('***Method->__process_tickList_forGlobal tick(for Global): Length tickList=' + str(len(_tickList)) + ' INIT')
         last_ID = '0'
 
         vol_tmp = 0
@@ -216,7 +215,7 @@ class DataProcessor_dec(DataProcessor):
 
 
 
-    def calc_delta_currentCandle(self, decData):
+    def calc_delta_currentCandle(self, decData, period = 0):
 
         self.logger.debug("***Method->calc_delta_currentCandle  INIT")
 
@@ -230,33 +229,93 @@ class DataProcessor_dec(DataProcessor):
                 s += v
             #
         #
+
+        #calculate delta for every previous candle according to the period
+        b2 = b
+        s2 = s
+        self.logger.debug('--------------------------------**** period: ' + str(period))
+        if 0 < period:
+            self.logger.debug('--------------------------------**** range: ' + repr(range(0, period)))
+            for p in range(0, period):
+                p += 1
+                self.logger.debug('--------------------------------**** p: ' + str(p))
+                self.logger.debug('--------------------------------**** decData.volume_ndArray: ' + repr(decData.volume_ndArray))
+
+                rowsNumber = np.size(decData.volume_ndArray, 0)
+                self.logger.debug('--------------------------------**** rowsNumber: ' + str(rowsNumber))
+
+                if rowsNumber > p:
+                    for x in range(Constantes.MARKET_EUROFX_TICKS_BY_CANDLE):
+                        self.logger.debug('--------------------------------**** x: ' + str(x))
+                        v2 = decData.volume_ndArray[rowsNumber - p, x]
+                        self.logger.debug('--------------------------------**** v2: ' + str(v2))
+                        if v2 >= 0:
+                            b2 += v2
+                        else:
+                            s2 += v2
+                        #
+                    #for
+                #if
+            #for
+        #if
+
+
         self.logger.debug("Process __process_tickList: s=" + str(s) + ', b=' + str(b))
         errormessageD1, delta = DataProcessor_util.calcDelta(b, (s * -1), self.logger)
         delta_dec = Decimal(delta)
         delta_dec = Decimal(delta_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
-        decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
 
-        self.logger.debug("***Method->calc_delta_currentCandle: delta=" + str(delta_dec) + "  ENDS")
+        self.logger.debug("Process __process_tickList: s2=" + str(s2) + ', b2=' + str(b2))
+        errormessageD1, delta2 = DataProcessor_util.calcDelta(b2, (s2 * -1), self.logger)
+        delta_dec2 = Decimal(delta2)
+        delta_dec2 = Decimal(delta_dec2.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
+
+        decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
+        decData.calculatedData_ndArray[3, decData.calculatedData_index] = delta_dec2
+
+        self.logger.info("***Method->calc_delta_currentCandle: delta=" + str(delta_dec) + ", delta2: " + str(delta2) + "  ENDS")
         return delta_dec
     # fin calc_delta_currentCandle
+
 
 
     """
     avg vol of ticks
     """
-    def calc_avgvol_currentcandel(self, decData):
+    def calc_volFiltered_currentcandle(self, decData):
 
-        self.logger.debug("***Method->calc_avgvol_currentcandel: volume_ndArray_tmp=" + repr(decData.volume_ndArray_tmp) + ' INIT')
+        self.logger.debug(
+            "***Method->calc_volFiltered_currentcandle: volume_ndArray_tmp=" + repr(decData.volume_ndArray_tmp) + ' INIT')
 
-        arTmp = np.absolute(decData.volume_ndArray_tmp[0, :decData.arrays_index + 1])
-        avg_vol = np.mean(arTmp)
+        arTmp = np.absolute(decData.volume_ndArray_tmp[0, :decData.arrays_index + 1])  # quita signo
+        self.logger.debug('???? arTmp_1:' + repr(arTmp))
+        arTmp = arTmp[arTmp >= 10]
+        self.logger.debug('???? arTmp_2:' + repr(arTmp))
+        vol = np.sum(arTmp)
+        self.logger.debug('???? vol:' + str(vol))
+        decData.calculatedData_ndArray[4, decData.calculatedData_index] = vol
+
+        self.logger.debug("***Method->calc_volFiltered_currentcandle:  vol_dec=" + str(vol) + ' ENDS')
+        return vol
+    # fin calc_volFiltered_currentcandle
+
+
+    """
+    avg vol of ticks
+    """
+    def calc_avgvol_currentcandle(self, decData):
+
+        self.logger.debug("***Method->calc_avgvol_currentcandle: volume_ndArray_tmp=" + repr(decData.volume_ndArray_tmp) + ' INIT')
+
+        arTmp = np.absolute(decData.volume_ndArray_tmp[0, :decData.arrays_index + 1])  #quita signo
+        avg_vol = np.mean(arTmp)                                                       #media
         avg_vol_dec = Decimal(avg_vol)
         avg_vol_dec = Decimal(avg_vol_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
         decData.calculatedData_ndArray[1, decData.calculatedData_index] = avg_vol_dec
 
-        self.logger.debug("***Method->calc_avgvol_currentcandel:  avg_vol_dec=" + str(avg_vol_dec) + ' ENDS')
+        self.logger.debug("***Method->calc_avgvol_currentcandle:  avg_vol_dec=" + str(avg_vol_dec) + ' ENDS')
         return avg_vol_dec
-    # fin calc_avgvol_currentcandel
+    # fin calc_avgvol_currentcandle
 
 
 
@@ -303,6 +362,7 @@ class DataProcessor_dec(DataProcessor):
 
         elif Constantes.MARKET_NASDAQ == _market:
             maxColNumber = Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE
+
         elif Constantes.MARKET_DAX == _market:
             maxColNumber = Constantes.MARKET_DAX_TICKS_BY_CANDLE
         #
@@ -328,13 +388,17 @@ class DataProcessor_dec(DataProcessor):
                 self.logger.debug("Process __process_tickList: tick vol=" + str(decData.volume_ndArray_tmp[0, decData.arrays_index]))
 
                 # CALC DELTA OF CURRENT CANDLE
-                delta_dec = self.calc_delta_currentCandle(decData)
+                period = 1
+                delta_dec = self.calc_delta_currentCandle(decData, period)
 
                 # CALC AVG VOL OF CURRENT CANDLE
-                avg_vol_dec = self.calc_avgvol_currentcandel(decData)
+                avg_vol_dec = self.calc_avgvol_currentcandle(decData)
+
+                # CALC FILTERED VOLUME
+                vol_filtered = self.calc_volFiltered_currentcandle(decData)
 
                 # CALC DELTA STRONG OF CURRENT CANDLE
-                self.calc_deltaStrong_currentcandle(avg_vol_dec, decData, delta_dec)
+                self.calc_deltaStrong_currentcandle(vol_filtered, decData, delta_dec)
 
                 decData.arrays_index += 1
 
