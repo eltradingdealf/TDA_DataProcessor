@@ -48,8 +48,9 @@ class Dec_data:
     ticks_array = [[]]
     ticks_array_tmp = []
 
-    volume_ndArray = np.zeros((1, 1), dtype=int)
+    volume_ndArray = np.zeros((1, 1), dtype=int) #All the volume Ticks in a 2 dimensions array
     volume_ndArray_tmp = np.zeros(1, dtype=int)
+    volumetotal_ndArray = np.zeros(1, dtype=int)  #Store all the volume ticks in a One Dimension array
 
     arrays_initialized = False
     arrays_index = 0
@@ -77,23 +78,9 @@ class Dec_data:
         if not self.arrays_initialized:
             self.logger.info('***Method->initArrays  arrays NOT initialized')
 
-            if Constantes.MARKET_EUROFX == __market:
-                self.volume_ndArray = np.zeros((1, Constantes.MARKET_EUROFX_TICKS_BY_CANDLE), dtype=int)
-                self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_EUROFX_TICKS_BY_CANDLE), dtype=int)
-
-            elif Constantes.MARKET_SP500 == __market:
-                self.volume_ndArray = np.zeros((1, Constantes.MARKET_SP500_TICKS_BY_CANDLE), dtype=int)
-                self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_SP500_TICKS_BY_CANDLE), dtype=int)
-
-            elif Constantes.MARKET_NASDAQ == __market:
-                self.volume_ndArray = np.zeros((1, Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE), dtype=int)
-                self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE), dtype=int)
-
-            elif Constantes.MARKET_DAX == __market:
-                self.volume_ndArray = np.zeros((1, Constantes.MARKET_DAX_TICKS_BY_CANDLE), dtype=int)
-                self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_DAX_TICKS_BY_CANDLE), dtype=int)
-            #
-            #
+            self.volumetotal_ndArray = np.zeros(1, dtype=int)
+            self.volume_ndArray = np.zeros((1, Constantes.TICKS_BY_CANDLE[__market]), dtype=int)
+            self.volume_ndArray_tmp = np.zeros((1, Constantes.TICKS_BY_CANDLE[__market]), dtype=int)
 
             self.arrays_initialized = True
             self.arrays_index = 0
@@ -110,19 +97,7 @@ class Dec_data:
         self.logger.debug('***Method->concatenateRowsTmp  INIT')
 
         self.volume_ndArray = np.concatenate((self.volume_ndArray, self.volume_ndArray_tmp), axis=0)
-
-        if Constantes.MARKET_EUROFX == __market:
-            self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_EUROFX_TICKS_BY_CANDLE), dtype=int)
-
-        elif Constantes.MARKET_SP500 == __market:
-            self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_SP500_TICKS_BY_CANDLE), dtype=int)
-
-        elif Constantes.MARKET_NASDAQ == __market:
-            self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE), dtype=int)
-
-        elif Constantes.MARKET_DAX == __market:
-            self.volume_ndArray_tmp = np.zeros((1, Constantes.MARKET_DAX_TICKS_BY_CANDLE), dtype=int)
-        #
+        self.volume_ndArray_tmp = np.zeros((1, Constantes.TICKS_BY_CANDLE[__market]), dtype=int)
         self.arrays_index = 0
 
         #New Col for Calculated data array
@@ -179,6 +154,7 @@ class Dec_data:
         result += ', total_sell_vol_sess=' + str(self.total_sell_vol_sess)
         result += ', total_volumeprofile_dict=' + repr(self.total_volumeprofile_dict)
         result += ', tmp_volumeprofile_dict=' + repr(self.tmp_volumeprofile_dict)
+        result += ', volumetotal_ndArray=' + repr(self.volumetotal_ndArray)
 
         result += '}'
 

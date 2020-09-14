@@ -271,25 +271,37 @@ class DataProcessor_dec(DataProcessor):
         delta_dec2 = Decimal(delta2)
         delta_dec2 = Decimal(delta_dec2.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
 
-        #decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
-        decData.calculatedData_ndArray[3, decData.calculatedData_index] = delta_dec2
-
         self.logger.info("***Method->calc_delta: delta=" + str(delta_dec) + ", delta2: " + str(delta2) + "  ENDS")
-        return delta_dec
+        return delta_dec2
     # fin calc_delta
 
 
 
-    def calc_delta_byNumberTicks(self, decData, numberOfTicks = 50):
-        """""numberOfTicks can't be larger than the array length"""
+    def calc_delta_byNumberTicks(self, decData, _numberOfTicks = 50):
 
-        self.logger.info("***Method->calc_delta_byNumberTicks  INIT")
+        self.logger.info("***Method->calc_delta_byNumberTicks, decData.volumetotal_ndArray: " + repr(decData.volumetotal_ndArray) +"  INIT")
+        self.logger.info('???? _numberOfTicks: ' + str(_numberOfTicks))
+
+        arSize = np.size(decData.volumetotal_ndArray)
+        self.logger.info('???? arSize: ' + str(arSize))
+        iStart = 0
+        self.logger.info('???? iStart: ' + str(iStart))
+        if _numberOfTicks < arSize:
+            iStart = arSize - _numberOfTicks - 1
+            self.logger.info('???? iStart: ' + str(iStart))
+        #
+
+        arTmp = decData.volumetotal_ndArray[iStart:]
+        arTmpSize = np.size(arTmp)
+        self.logger.info('???? arTmp: ' + repr(arTmp))
 
         #First calculate data for delta of current candle
         b = 0
         s = 0
-        for x in range(decData.arrays_index + 1):
-            v = decData.volume_ndArray_tmp[0, x]
+        for x in range(0, arTmpSize):
+            v = arTmp[x]
+            self.logger.info('???? x: ' + str(x))
+            self.logger.info('???? v: ' + str(v))
             if v >= 0:
                 b += v
             else:
@@ -297,40 +309,10 @@ class DataProcessor_dec(DataProcessor):
             #
         #
 
-        #Now calculate the rest of ticks from the previous candle
-        self.logger.info('???????????????? decData.volume_ndArray: ' + repr(decData.volume_ndArray))
-        if decData.arrays_index < numberOfTicks:
-            nRows = np.size(decData.volume_ndArray, 0)
-            self.logger.info('???????????????? nRows: ' + str(nRows))  # rows
-
-            if 1 < nRows:
-                self.logger.info('???????????????? decData.arrays_index: ' + str(decData.arrays_index) + ', numberOfTicks: ' + str(numberOfTicks))  #
-                nTicksLeft = numberOfTicks - decData.arrays_index
-                self.logger.info('?????????????? nTicksLeft: ' + str(nTicksLeft))
-                ndArrTmp = decData.volume_ndArray[-1, :]
-                self.logger.info('?????????????? ndArrTmp: ' + repr(ndArrTmp))
-
-                arrSize  = np.size(ndArrTmp)
-                initRange = arrSize - nTicksLeft
-                for x in range(initRange, arrSize):
-                    self.logger.info('?????????????? x: ' + str(x))
-                    v2 = ndArrTmp[x]
-                    self.logger.info('?????????????? v2: ' + str(v2))
-                    if v2 >= 0:
-                        b += v2
-                    else:
-                        s += v2
-                    #
-                #for
-            #if
-        #if
-
         self.logger.info("Process __process_tickList: s=" + str(s) + ', b=' + str(b))
         errormessageD1, delta = DataProcessor_util.calcDelta(b, (s * -1), self.logger)
         delta_dec = Decimal(delta)
         delta_dec = Decimal(delta_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
-
-        decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
 
         self.logger.info("***Method->calc_delta_byNumberTicks: delta_dec: " + str(delta_dec) + "  ENDS")
         return delta_dec
@@ -349,29 +331,35 @@ class DataProcessor_dec(DataProcessor):
         arTmp = np.absolute(decData.volume_ndArray_tmp[0, :decData.arrays_index + 1])  # quita signo
         arTmp = arTmp[arTmp >= 10]
         vol = np.sum(arTmp)
-        decData.calculatedData_ndArray[4, decData.calculatedData_index] = vol
 
         self.logger.debug("***Method->calc_volFiltered_currentcandle:  vol=" + str(vol) + ' ENDS')
         return vol
     # fin calc_volFiltered_currentcandle
 
 
+
     """
     avg vol of ticks
     """
-    def calc_avgvol_currentcandle(self, decData):
+    def calc_avgvol_byNumberTicks(self, decData, _numberOfTicks = 50):
 
-        self.logger.debug("***Method->calc_avgvol_currentcandle: volume_ndArray_tmp=" + repr(decData.volume_ndArray_tmp) + ' INIT')
+        self.logger.debug("***Method->calc_avgvol_byNumberTicks: volumetotal_ndArray=" + repr(decData.volumetotal_ndArray) + ' INIT')
 
-        arTmp = np.absolute(decData.volume_ndArray_tmp[0, :decData.arrays_index + 1])  #quita signo
+
+        arSize = np.size(decData.volumetotal_ndArray)
+        iStart = 0
+        if _numberOfTicks < arSize:
+            iStart = arSize - _numberOfTicks - 1
+        #
+        arTmp = np.absolute(decData.volumetotal_ndArray[iStart:])  # quita signo
+        self.logger.debug('?????? calc_avgvol_byNumberTicks arTmp: ' + repr(arTmp))
         avg_vol = np.mean(arTmp)                                                       #media
         avg_vol_dec = Decimal(avg_vol)
         avg_vol_dec = Decimal(avg_vol_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
-        decData.calculatedData_ndArray[1, decData.calculatedData_index] = avg_vol_dec
 
-        self.logger.debug("***Method->calc_avgvol_currentcandle:  avg_vol_dec=" + str(avg_vol_dec) + ' ENDS')
+        self.logger.debug("***Method->calc_avgvol_byNumberTicks:  avg_vol_dec=" + str(avg_vol_dec) + ' ENDS')
         return avg_vol_dec
-    # fin calc_avgvol_currentcandle
+    # fin calc_avgvol_byNumberTicks
 
 
 
@@ -389,9 +377,9 @@ class DataProcessor_dec(DataProcessor):
         # as the sign of the second operand.
         # For example: Decimal('2.3').copy_sign(Decimal('-1.5')) --> Decimal('-2.3')
         strong_dec_signal = strong_dec.copy_sign(delta_dec)
-        decData.calculatedData_ndArray[2, decData.calculatedData_index] = strong_dec_signal
 
         self.logger.debug("***Method->calc_deltaStrong_currentcandle: strong_dec=" + str(strong_dec) + ' ENDS')
+        return strong_dec_signal
     # fin calc_deltaStrong_currentcandle
 
 
@@ -410,18 +398,7 @@ class DataProcessor_dec(DataProcessor):
         decData.initArrays(_market)
 
         maxColIndex = 0
-        if Constantes.MARKET_EUROFX == _market:
-            maxColNumber = Constantes.MARKET_EUROFX_TICKS_BY_CANDLE
-
-        elif Constantes.MARKET_SP500 == _market:
-            maxColNumber = Constantes.MARKET_SP500_TICKS_BY_CANDLE
-
-        elif Constantes.MARKET_NASDAQ == _market:
-            maxColNumber = Constantes.MARKET_NASDAQ_TICKS_BY_CANDLE
-
-        elif Constantes.MARKET_DAX == _market:
-            maxColNumber = Constantes.MARKET_DAX_TICKS_BY_CANDLE
-        #
+        maxColNumber = Constantes.TICKS_BY_CANDLE[_market]
 
         for tick in _tickList:
 
@@ -436,9 +413,11 @@ class DataProcessor_dec(DataProcessor):
                 self.logger.debug("Process __process_tickList: tick_ope=" + str(tick.ope))
                 if Constantes.TICK_OPE_BUY == tick.ope:
                     decData.volume_ndArray_tmp[0, decData.arrays_index] = tick.trade_vol
+                    decData.volumetotal_ndArray = np.append(decData.volumetotal_ndArray, tick.trade_vol)
                 #
                 elif Constantes.TICK_OPE_SELL == tick.ope:
                     decData.volume_ndArray_tmp[0, decData.arrays_index] = -1 * tick.trade_vol
+                    decData.volumetotal_ndArray = np.append(decData.volumetotal_ndArray, -1 * tick.trade_vol)
                 #
                 # positive vol == buy, negative vol == sell
                 self.logger.debug("Process __process_tickList: tick vol=" + str(decData.volume_ndArray_tmp[0, decData.arrays_index]))
@@ -447,19 +426,25 @@ class DataProcessor_dec(DataProcessor):
                 period = 3
                 delta_dec = self.calc_delta(decData, period)
 
-                delta_dec2 = self.calc_delta_byNumberTicks(decData, Constantes.MARKET_EUROFX_TICKS_BY_CANDLE)
+                delta_dec2 = self.calc_delta_byNumberTicks(decData, maxColNumber)
 
-                # CALC AVG VOL OF CURRENT CANDLE
-                avg_vol_dec = self.calc_avgvol_currentcandle(decData)
+                # CALC AVG VOL FROM THE LAST NUMBER OF TICKS
+                avg_vol_dec = self.calc_avgvol_byNumberTicks(decData, maxColNumber)
 
                 # CALC FILTERED VOLUME
                 vol_filtered = self.calc_volFiltered_currentcandle(decData)
 
                 # CALC DELTA STRONG OF CURRENT CANDLE
-                self.calc_deltaStrong_currentcandle(vol_filtered, decData, delta_dec2)
+                deltaStrong_dec = self.calc_deltaStrong_currentcandle(vol_filtered, decData, delta_dec2)
+
+                #SAVE the data
+                decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
+                decData.calculatedData_ndArray[1, decData.calculatedData_index] = avg_vol_dec
+                decData.calculatedData_ndArray[2, decData.calculatedData_index] = deltaStrong_dec
+                decData.calculatedData_ndArray[3, decData.calculatedData_index] = delta_dec2
+                decData.calculatedData_ndArray[4, decData.calculatedData_index] = vol_filtered
 
                 decData.arrays_index += 1
-
                 self.logger.debug('Process __process_tickList: calculatedData_ndArray:' + repr(decData.calculatedData_ndArray))
 
             except Exception as ex:
