@@ -279,29 +279,23 @@ class DataProcessor_dec(DataProcessor):
 
     def calc_delta_byNumberTicks(self, decData, _numberOfTicks = 50):
 
-        self.logger.info("***Method->calc_delta_byNumberTicks, decData.volumetotal_ndArray: " + repr(decData.volumetotal_ndArray) +"  INIT")
-        self.logger.info('???? _numberOfTicks: ' + str(_numberOfTicks))
+        self.logger.debug("***Method->calc_delta_byNumberTicks, decData.volumetotal_ndArray: " + repr(decData.volumetotal_ndArray) +"  INIT")
+        self.logger.debug('???? _numberOfTicks: ' + str(_numberOfTicks))
 
         arSize = np.size(decData.volumetotal_ndArray)
-        self.logger.info('???? arSize: ' + str(arSize))
         iStart = 0
-        self.logger.info('???? iStart: ' + str(iStart))
         if _numberOfTicks < arSize:
             iStart = arSize - _numberOfTicks - 1
-            self.logger.info('???? iStart: ' + str(iStart))
         #
 
         arTmp = decData.volumetotal_ndArray[iStart:]
         arTmpSize = np.size(arTmp)
-        self.logger.info('???? arTmp: ' + repr(arTmp))
 
         #First calculate data for delta of current candle
         b = 0
         s = 0
         for x in range(0, arTmpSize):
             v = arTmp[x]
-            self.logger.info('???? x: ' + str(x))
-            self.logger.info('???? v: ' + str(v))
             if v >= 0:
                 b += v
             else:
@@ -309,12 +303,12 @@ class DataProcessor_dec(DataProcessor):
             #
         #
 
-        self.logger.info("Process __process_tickList: s=" + str(s) + ', b=' + str(b))
+        self.logger.debug("Process __process_tickList: s=" + str(s) + ', b=' + str(b))
         errormessageD1, delta = DataProcessor_util.calcDelta(b, (s * -1), self.logger)
         delta_dec = Decimal(delta)
         delta_dec = Decimal(delta_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
 
-        self.logger.info("***Method->calc_delta_byNumberTicks: delta_dec: " + str(delta_dec) + "  ENDS")
+        self.logger.debug("***Method->calc_delta_byNumberTicks: delta_dec: " + str(delta_dec) + "  ENDS")
         return delta_dec
     # fin calc_delta_byNumberTicks
 
@@ -366,7 +360,7 @@ class DataProcessor_dec(DataProcessor):
     """
     avg_vol * delta
     """
-    def calc_deltaStrong_currentcandle(self, avg_vol_dec, decData, delta_dec):
+    def calc_deltaStrong_currentcandle(self, avg_vol_dec, delta_dec):
 
         self.logger.debug("***Method->calc_deltaStrong_currentcandle: avg_vol_dec=" + repr(avg_vol_dec) + ' INIT')
 
@@ -435,7 +429,7 @@ class DataProcessor_dec(DataProcessor):
                 vol_filtered = self.calc_volFiltered_currentcandle(decData)
 
                 # CALC DELTA STRONG OF CURRENT CANDLE
-                deltaStrong_dec = self.calc_deltaStrong_currentcandle(vol_filtered, decData, delta_dec2)
+                deltaStrong_dec = self.calc_deltaStrong_currentcandle(avg_vol_dec, delta_dec2)
 
                 #SAVE the data
                 decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
