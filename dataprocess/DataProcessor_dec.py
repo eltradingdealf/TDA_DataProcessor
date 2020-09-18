@@ -21,6 +21,7 @@ from dataprocess.DataProcessor import DataProcessor
 from model.Singleton_DataTemp_Dec import Singleton_DataTemp_Dec
 from common import Constantes
 from dataprocess import DataProcessor_util
+from common import Util
 
 
 class DataProcessor_dec(DataProcessor):
@@ -215,6 +216,32 @@ class DataProcessor_dec(DataProcessor):
 
 
 
+    def calc_speedOfTape(self, decData, tickVol):
+        self.logger.info("***Method->calc_speedOfTape, tickVol: " + str(tickVol) + "  INIT")
+
+        result = decData.speedCurrent
+
+        decData.speedList.append(tickVol)
+
+        currTime = Util.getCurrentTimeInSeconds()
+        timeDiff = currTime - decData.speedT1
+        self.logger.info('???? currTime: ' + str(currTime) + ', timeDiff: ' + str(timeDiff))
+
+        if decData.speedTimeToFillList < timeDiff:
+            result = len(decData.speedList)
+            self.logger.info('???? result: ' + str(result))
+            decData.speedCurrent = result
+
+            decData.speedList = []
+            decData.speedT1 = currTime
+        #
+        self.logger.info("Process calc_speedOfTape: result=" + str(result))
+        self.logger.info("***Method->calc_speedOfTape  ENDS")
+        return result
+    #fin calc_speedOfTape
+
+
+
     def calc_delta(self, decData, period = 0):
 
         self.logger.debug("***Method->calc_delta  INIT")
@@ -405,11 +432,14 @@ class DataProcessor_dec(DataProcessor):
 
                 # store vol
                 self.logger.debug("Process __process_tickList: tick_ope=" + str(tick.ope))
+                tickVol = 0
                 if Constantes.TICK_OPE_BUY == tick.ope:
+                    tickVol = tick.trade_vol
                     decData.volume_ndArray_tmp[0, decData.arrays_index] = tick.trade_vol
                     decData.volumetotal_ndArray = np.append(decData.volumetotal_ndArray, tick.trade_vol)
                 #
                 elif Constantes.TICK_OPE_SELL == tick.ope:
+                    tickVol = -1 * tick.trade_vol
                     decData.volume_ndArray_tmp[0, decData.arrays_index] = -1 * tick.trade_vol
                     decData.volumetotal_ndArray = np.append(decData.volumetotal_ndArray, -1 * tick.trade_vol)
                 #
@@ -431,12 +461,19 @@ class DataProcessor_dec(DataProcessor):
                 # CALC DELTA STRONG OF CURRENT CANDLE
                 deltaStrong_dec = self.calc_deltaStrong_currentcandle(avg_vol_dec, delta_dec2)
 
+                #SPEED
+                speed = self.calc_speedOfTape(decData, tickVol)
+
                 #SAVE the data
                 decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
                 decData.calculatedData_ndArray[1, decData.calculatedData_index] = avg_vol_dec
                 decData.calculatedData_ndArray[2, decData.calculatedData_index] = deltaStrong_dec
                 decData.calculatedData_ndArray[3, decData.calculatedData_index] = delta_dec2
                 decData.calculatedData_ndArray[4, decData.calculatedData_index] = vol_filtered
+                currentSpeed = decData.calculatedData_ndArray[4, decData.calculatedData_index]
+                newSpeed = currentSpeed + speed
+                self.logger.info('??????? newSpeed: ' + str(newSpeed))
+                decData.calculatedData_ndArray[5, decData.calculatedData_index] = newSpeed
 
                 decData.arrays_index += 1
                 self.logger.debug('Process __process_tickList: calculatedData_ndArray:' + repr(decData.calculatedData_ndArray))

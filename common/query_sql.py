@@ -371,45 +371,46 @@ GET_LAST_TICKS_BY_ID_LIST_DAX =     """   SELECT ID,
 
 
 SQL_INSERT_UPDATE_GLOBAL_DATA =     """   INSERT INTO trading_db.visu_global 
-                                          (sessiondate, market, buy_price, sell_price, vprofile, volume_total) 
-                                          VALUES(%s, %s, %s, %s, %s, %s) 
+                                          (sessiondate, market, buy_price, sell_price, vprofile, volume_total, speed) 
+                                          VALUES(%s, %s, %s, %s, %s, %s, %s) 
                                           ON DUPLICATE KEY UPDATE 
                                           sessiondate=VALUES(sessiondate), market=VALUES(market), buy_price=VALUES(buy_price), 
-                                          sell_price=VALUES(sell_price), vprofile=VALUES(vprofile), volume_total=VALUES(volume_total)                                          
+                                          sell_price=VALUES(sell_price), vprofile=VALUES(vprofile), volume_total=VALUES(volume_total),
+                                          speed=VALUES(speed)                                          
                                     """
 
 SQL_INSERT_UPDATE_CALCULATED_DATA_EUROFX =      """   INSERT INTO trading_db.visu_datacalc_feuro 
-                                                      (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04) 
-                                                      VALUES(%s, %s, %s, %s, %s, %s, %s) 
+                                                      (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04, data05) 
+                                                      VALUES(%s, %s, %s, %s, %s, %s, %s, %s) 
                                                       ON DUPLICATE KEY UPDATE 
                                                       sessiondate=VALUES(sessiondate), candle_id=VALUES(candle_id), delta=VALUES(delta), 
                                                       vol_avg=VALUES(vol_avg), delta_strong=VALUES(delta_strong), data03=VALUES(data03),
-                                                      data04=VALUES(data04)                                          
+                                                      data04=VALUES(data04), data05=VALUES(data05)
                                                 """
 
 SQL_INSERT_UPDATE_CALCULATED_DATA_SP500 =      """   INSERT INTO trading_db.visu_datacalc_fsp500 
-                                                      (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04)
-                                                      VALUES(%s, %s, %s, %s, %s, %s, %s)  
+                                                      (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04, data05) 
+                                                      VALUES(%s, %s, %s, %s, %s, %s, %s, %s)  
                                                       ON DUPLICATE KEY UPDATE 
                                                       sessiondate=VALUES(sessiondate), candle_id=VALUES(candle_id), delta=VALUES(delta), 
                                                       vol_avg=VALUES(vol_avg), delta_strong=VALUES(delta_strong), data03=VALUES(data03),
-                                                      data04=VALUES(data04)                                         
+                                                      data04=VALUES(data04), data05=VALUES(data05)
                                                 """
 
 
 SQL_INSERT_UPDATE_CALCULATED_DATA_NASDAQ =      """   INSERT INTO trading_db.visu_datacalc_fnasdaq 
-                                                      (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04)
-                                                      VALUES(%s, %s, %s, %s, %s, %s, %s) 
+                                                      (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04, data05) 
+                                                      VALUES(%s, %s, %s, %s, %s, %s, %s, %s) 
                                                       ON DUPLICATE KEY UPDATE 
                                                       sessiondate=VALUES(sessiondate), candle_id=VALUES(candle_id), delta=VALUES(delta), 
                                                       vol_avg=VALUES(vol_avg), delta_strong=VALUES(delta_strong), data03=VALUES(data03),
-                                                      data04=VALUES(data04)                                         
+                                                      data04=VALUES(data04), data05=VALUES(data05)
                                                 """
 
 
 SQL_INSERT_UPDATE_CALCULATED_DATA_DAX =         """   INSERT INTO trading_db.visu_datacalc_dax 
-                                                      (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04)
-                                                      VALUES(%s, %s, %s, %s, %s, %s, %s) 
+                                                      (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04, data05) 
+                                                      VALUES(%s, %s, %s, %s, %s, %s, %s, %s) 
                                                       ON DUPLICATE KEY UPDATE 
                                                       sessiondate=VALUES(sessiondate), candle_id=VALUES(candle_id), delta=VALUES(delta), 
                                                       vol_avg=VALUES(vol_avg), delta_strong=VALUES(delta_strong), data03=VALUES(data03),
