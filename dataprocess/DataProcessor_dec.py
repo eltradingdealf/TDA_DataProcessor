@@ -21,6 +21,7 @@ from dataprocess.DataProcessor import DataProcessor
 from model.Singleton_DataTemp_Dec import Singleton_DataTemp_Dec
 from common import Constantes
 from dataprocess import DataProcessor_util
+from common import Util
 
 
 class DataProcessor_dec(DataProcessor):
@@ -215,6 +216,32 @@ class DataProcessor_dec(DataProcessor):
 
 
 
+    def calc_speedOfTape(self, decData, tickVol):
+        self.logger.info("***Method->calc_speedOfTape, tickVol: " + str(tickVol) + "  INIT")
+
+        result = decData.speedCurrent
+
+        decData.speedList.append(tickVol)
+
+        currTime = Util.getCurrentTimeInSeconds()
+        timeDiff = currTime - decData.speedT1
+        self.logger.info('???? currTime: ' + str(currTime) + ', timeDiff: ' + str(timeDiff))
+
+        if decData.speedTimeToFillList < timeDiff:
+            result = len(decData.speedList)
+            self.logger.info('???? result: ' + str(result))
+            decData.speedCurrent = result
+
+            decData.speedList = []
+            decData.speedT1 = currTime
+        #
+        self.logger.info("Process calc_speedOfTape: result=" + str(result))
+        self.logger.info("***Method->calc_speedOfTape  ENDS")
+        return result
+    #fin calc_speedOfTape
+
+
+
     def calc_delta(self, decData, period = 0):
 
         self.logger.debug("***Method->calc_delta  INIT")
@@ -279,29 +306,23 @@ class DataProcessor_dec(DataProcessor):
 
     def calc_delta_byNumberTicks(self, decData, _numberOfTicks = 50):
 
-        self.logger.info("***Method->calc_delta_byNumberTicks, decData.volumetotal_ndArray: " + repr(decData.volumetotal_ndArray) +"  INIT")
-        self.logger.info('???? _numberOfTicks: ' + str(_numberOfTicks))
+        self.logger.debug("***Method->calc_delta_byNumberTicks, decData.volumetotal_ndArray: " + repr(decData.volumetotal_ndArray) +"  INIT")
+        self.logger.debug('???? _numberOfTicks: ' + str(_numberOfTicks))
 
         arSize = np.size(decData.volumetotal_ndArray)
-        self.logger.info('???? arSize: ' + str(arSize))
         iStart = 0
-        self.logger.info('???? iStart: ' + str(iStart))
         if _numberOfTicks < arSize:
             iStart = arSize - _numberOfTicks - 1
-            self.logger.info('???? iStart: ' + str(iStart))
         #
 
         arTmp = decData.volumetotal_ndArray[iStart:]
         arTmpSize = np.size(arTmp)
-        self.logger.info('???? arTmp: ' + repr(arTmp))
 
         #First calculate data for delta of current candle
         b = 0
         s = 0
         for x in range(0, arTmpSize):
             v = arTmp[x]
-            self.logger.info('???? x: ' + str(x))
-            self.logger.info('???? v: ' + str(v))
             if v >= 0:
                 b += v
             else:
@@ -309,12 +330,12 @@ class DataProcessor_dec(DataProcessor):
             #
         #
 
-        self.logger.info("Process __process_tickList: s=" + str(s) + ', b=' + str(b))
+        self.logger.debug("Process __process_tickList: s=" + str(s) + ', b=' + str(b))
         errormessageD1, delta = DataProcessor_util.calcDelta(b, (s * -1), self.logger)
         delta_dec = Decimal(delta)
         delta_dec = Decimal(delta_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
 
-        self.logger.info("***Method->calc_delta_byNumberTicks: delta_dec: " + str(delta_dec) + "  ENDS")
+        self.logger.debug("***Method->calc_delta_byNumberTicks: delta_dec: " + str(delta_dec) + "  ENDS")
         return delta_dec
     # fin calc_delta_byNumberTicks
 
@@ -366,7 +387,7 @@ class DataProcessor_dec(DataProcessor):
     """
     avg_vol * delta
     """
-    def calc_deltaStrong_currentcandle(self, avg_vol_dec, decData, delta_dec):
+    def calc_deltaStrong_currentcandle(self, avg_vol_dec, delta_dec):
 
         self.logger.debug("***Method->calc_deltaStrong_currentcandle: avg_vol_dec=" + repr(avg_vol_dec) + ' INIT')
 
@@ -411,11 +432,14 @@ class DataProcessor_dec(DataProcessor):
 
                 # store vol
                 self.logger.debug("Process __process_tickList: tick_ope=" + str(tick.ope))
+                tickVol = 0
                 if Constantes.TICK_OPE_BUY == tick.ope:
+                    tickVol = tick.trade_vol
                     decData.volume_ndArray_tmp[0, decData.arrays_index] = tick.trade_vol
                     decData.volumetotal_ndArray = np.append(decData.volumetotal_ndArray, tick.trade_vol)
                 #
                 elif Constantes.TICK_OPE_SELL == tick.ope:
+                    tickVol = -1 * tick.trade_vol
                     decData.volume_ndArray_tmp[0, decData.arrays_index] = -1 * tick.trade_vol
                     decData.volumetotal_ndArray = np.append(decData.volumetotal_ndArray, -1 * tick.trade_vol)
                 #
@@ -435,7 +459,10 @@ class DataProcessor_dec(DataProcessor):
                 vol_filtered = self.calc_volFiltered_currentcandle(decData)
 
                 # CALC DELTA STRONG OF CURRENT CANDLE
-                deltaStrong_dec = self.calc_deltaStrong_currentcandle(vol_filtered, decData, delta_dec2)
+                deltaStrong_dec = self.calc_deltaStrong_currentcandle(avg_vol_dec, delta_dec2)
+
+                #SPEED
+                speed = self.calc_speedOfTape(decData, tickVol)
 
                 #SAVE the data
                 decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
@@ -443,6 +470,10 @@ class DataProcessor_dec(DataProcessor):
                 decData.calculatedData_ndArray[2, decData.calculatedData_index] = deltaStrong_dec
                 decData.calculatedData_ndArray[3, decData.calculatedData_index] = delta_dec2
                 decData.calculatedData_ndArray[4, decData.calculatedData_index] = vol_filtered
+                currentSpeed = decData.calculatedData_ndArray[4, decData.calculatedData_index]
+                newSpeed = currentSpeed + speed
+                self.logger.info('??????? newSpeed: ' + str(newSpeed))
+                decData.calculatedData_ndArray[5, decData.calculatedData_index] = newSpeed
 
                 decData.arrays_index += 1
                 self.logger.debug('Process __process_tickList: calculatedData_ndArray:' + repr(decData.calculatedData_ndArray))

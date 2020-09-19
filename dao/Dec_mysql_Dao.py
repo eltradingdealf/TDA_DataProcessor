@@ -247,7 +247,8 @@ class Dec_mysql_Dao(iDecDAO):
                                     str(_calculatedData_ndArray[1, _index]),
                                     str(_calculatedData_ndArray[2, _index]),
                                     str(_calculatedData_ndArray[3, _index]),
-                                    str(_calculatedData_ndArray[4, _index])))
+                                    str(_calculatedData_ndArray[4, _index]),
+                                    str(_calculatedData_ndArray[5, _index])))
             #
             self.logger.debug('=====mysql, SQL_INSERT_UPDATE_CALCULATED_DATA_Fxxx query executed')
 
@@ -303,7 +304,12 @@ class Dec_mysql_Dao(iDecDAO):
 
             #cursor = connection.cursor()
             with connection.cursor() as cursor:
-                cursor.execute(query_sql.SQL_INSERT_UPDATE_GLOBAL_DATA, (_theTime['intDate'], _market, str(_decData.current_buy_price), str(_decData.current_sell_price), '0', _decData.total_vol_sess))
+                cursor.execute(query_sql.SQL_INSERT_UPDATE_GLOBAL_DATA, (_theTime['intDate'],
+                                                                         _market, str(_decData.current_buy_price),
+                                                                         str(_decData.current_sell_price),
+                                                                         '0',
+                                                                         _decData.total_vol_sess,
+                                                                         _decData.speedCurrent))
             #
             self.logger.debug('=====mysql, SQL_INSERT_UPDATE_GLOBAL_DATA query executed')
 

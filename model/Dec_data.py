@@ -44,6 +44,14 @@ class Dec_data:
     total_volumeprofile_dict    = {} #(key=price<str>, value=vol<int>)  Lista de la sesion completa
     tmp_volumeprofile_dict      = {} #(key=price<str>, value=vol<int>)  Lista parcial del ultimo ciclo.
 
+    #TAPE SPEED
+    speedList               = []
+    speedTimeToFillList     = 5 #in seconds
+    speedT1                 = 0
+    speedCurrent            = 0
+
+
+
     #---------------------------------------------
     ticks_array = [[]]
     ticks_array_tmp = []
@@ -62,9 +70,10 @@ class Dec_data:
     row 2 -> vol avg * vol delta
     row 3 -> vol delta Period
     row 4 -> vol Filtered
+    row 5 -> Speed
     One col by candle
     """
-    calculatedData_ndArray = np.zeros((5, 1))
+    calculatedData_ndArray = np.zeros((6, 1))
     calculatedData_index = 0
     #---------------------------------------------
 
@@ -101,7 +110,7 @@ class Dec_data:
         self.arrays_index = 0
 
         #New Col for Calculated data array
-        tmp = np.zeros((5, 1))
+        tmp = np.zeros((6, 1))
         self.calculatedData_ndArray = np.hstack((self.calculatedData_ndArray, tmp))
         self.calculatedData_index += 1
 
