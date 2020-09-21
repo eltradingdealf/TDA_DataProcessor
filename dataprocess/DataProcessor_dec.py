@@ -216,28 +216,33 @@ class DataProcessor_dec(DataProcessor):
 
 
 
-    def calc_speedOfTape(self, decData, tickVol):
+    def calc_speedOfTape(self, decData, tickVol, _currentSpeedT0):
         self.logger.info("***Method->calc_speedOfTape, tickVol: " + str(tickVol) + "  INIT")
 
-        result = decData.speedCurrent
+        resultSpeed = decData.speedCurrent
+        resultSpeedT0 = _currentSpeedT0
 
         decData.speedList.append(tickVol)
 
         currTime = Util.getCurrentTimeInSeconds()
         timeDiff = currTime - decData.speedT1
-        self.logger.info('???? currTime: ' + str(currTime) + ', timeDiff: ' + str(timeDiff))
+        self.logger.info('??????????????????????????????????? currTime: ' + str(currTime) + ', timeDiff: ' + str(timeDiff))
 
         if decData.speedTimeToFillList < timeDiff:
-            result = len(decData.speedList)
-            self.logger.info('???? result: ' + str(result))
-            decData.speedCurrent = result
+            resultSpeed = len(decData.speedList)
+            self.logger.info('??????????????????????????????????? resultSpeed: ' + str(resultSpeed))
+            decData.speedCurrent = resultSpeed
 
             decData.speedList = []
             decData.speedT1 = currTime
         #
-        self.logger.info("Process calc_speedOfTape: result=" + str(result))
+
+        if resultSpeed > resultSpeedT0:
+            resultSpeedT0 = resultSpeed
+
+        self.logger.info("??????????????????????????????????? Process calc_speedOfTape: resultSpeed=" + str(resultSpeed) + ', resultSpeedT0:' + str(resultSpeedT0))
         self.logger.info("***Method->calc_speedOfTape  ENDS")
-        return result
+        return resultSpeed, resultSpeedT0
     #fin calc_speedOfTape
 
 
@@ -298,31 +303,23 @@ class DataProcessor_dec(DataProcessor):
         delta_dec2 = Decimal(delta2)
         delta_dec2 = Decimal(delta_dec2.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
 
-        self.logger.info("***Method->calc_delta: delta=" + str(delta_dec) + ", delta2: " + str(delta2) + "  ENDS")
+        self.logger.debug("***Method->calc_delta: delta=" + str(delta_dec) + ", delta2: " + str(delta2) + "  ENDS")
         return delta_dec2
     # fin calc_delta
 
 
 
-    def calc_delta_byNumberTicks(self, decData, _numberOfTicks = 50):
+    def calc_delta_byNumberTicks(self, decData, _ndarrNumberTicks):
 
         self.logger.debug("***Method->calc_delta_byNumberTicks, decData.volumetotal_ndArray: " + repr(decData.volumetotal_ndArray) +"  INIT")
-        self.logger.debug('???? _numberOfTicks: ' + str(_numberOfTicks))
 
-        arSize = np.size(decData.volumetotal_ndArray)
-        iStart = 0
-        if _numberOfTicks < arSize:
-            iStart = arSize - _numberOfTicks - 1
-        #
-
-        arTmp = decData.volumetotal_ndArray[iStart:]
-        arTmpSize = np.size(arTmp)
+        ndarrSize = np.size(_ndarrNumberTicks)
 
         #First calculate data for delta of current candle
         b = 0
         s = 0
-        for x in range(0, arTmpSize):
-            v = arTmp[x]
+        for x in range(0, ndarrSize):
+            v = _ndarrNumberTicks[x]
             if v >= 0:
                 b += v
             else:
@@ -359,27 +356,42 @@ class DataProcessor_dec(DataProcessor):
 
 
 
+    def calc_volFiltered_byNumberTicks(self, decData, _ndarrNumberTicks):
+
+        self.logger.debug("***Method->calc_volFiltered_byNumberTicks: volumetotal_ndArray=" + repr(decData.volumetotal_ndArray) + ' INIT')
+
+        result = 0
+
+        arTmp = np.absolute(_ndarrNumberTicks) # quita signo
+        arTmp = arTmp[arTmp >= 10]
+        result = np.sum(arTmp)
+
+        arTmp2 = _ndarrNumberTicks[_ndarrNumberTicks >= 10]
+        arTmp3 = _ndarrNumberTicks[_ndarrNumberTicks <= -10]
+
+        ndarrResult = np.concatenate((arTmp2, arTmp3))
+        self.logger.debug("***Method->calc_volFiltered_byNumberTicks: volumetotal_ndArray=" + repr(decData.volumetotal_ndArray) + ' ENDS')
+
+        self.logger.info("***Method->calc_volFiltered_byNumberTicks: ndarrResult=" + repr(ndarrResult) + ' ENDS')
+        return result, ndarrResult
+    #fin calc_volFiltered_byNumberTicks
+
+
     """
     avg vol of ticks
     """
-    def calc_avgvol_byNumberTicks(self, decData, _numberOfTicks = 50):
+    def calc_avgvol_byNumberTicks(self, decData, _ndarrNumberTicks):
 
-        self.logger.debug("***Method->calc_avgvol_byNumberTicks: volumetotal_ndArray=" + repr(decData.volumetotal_ndArray) + ' INIT')
+        self.logger.debug("***Method->calc_avgvol_byNumberTicks: _ndarrNumberTicks=" + repr(_ndarrNumberTicks) + ' INIT')
 
-
-        arSize = np.size(decData.volumetotal_ndArray)
-        iStart = 0
-        if _numberOfTicks < arSize:
-            iStart = arSize - _numberOfTicks - 1
-        #
-        arTmp = np.absolute(decData.volumetotal_ndArray[iStart:])  # quita signo
+        arTmp = np.absolute(_ndarrNumberTicks)  # quita signo
         self.logger.debug('?????? calc_avgvol_byNumberTicks arTmp: ' + repr(arTmp))
         avg_vol = np.mean(arTmp)                                                       #media
-        avg_vol_dec = Decimal(avg_vol)
-        avg_vol_dec = Decimal(avg_vol_dec.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
+        result = Decimal(avg_vol)
+        result = Decimal(result.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
 
-        self.logger.debug("***Method->calc_avgvol_byNumberTicks:  avg_vol_dec=" + str(avg_vol_dec) + ' ENDS')
-        return avg_vol_dec
+        self.logger.debug("***Method->calc_avgvol_byNumberTicks:  result=" + str(result) + ' ENDS')
+        return result
     # fin calc_avgvol_byNumberTicks
 
 
@@ -402,6 +414,34 @@ class DataProcessor_dec(DataProcessor):
         self.logger.debug("***Method->calc_deltaStrong_currentcandle: strong_dec=" + str(strong_dec) + ' ENDS')
         return strong_dec_signal
     # fin calc_deltaStrong_currentcandle
+
+
+    def calc_deltaStrong_byNumberTicks(self, _vol_filtered, _ndarrFiltered, _numberOfTicks, _speed):
+
+        s, b = DataProcessor_util.calc_sbForDelta_byArr(_ndarrFiltered)
+        self.logger.info("????????????????????????????????????????¿???Process calc_deltaStrong_byNumberTicks: s=" + str(s) + ', b=' + str(b))
+        errormessageD1, delta = DataProcessor_util.calcDelta(b, (s * -1), self.logger)
+
+
+        strong = Decimal((((delta * Decimal(0.1)) * _vol_filtered) / _numberOfTicks) * int(_speed))
+        result = Decimal(strong.quantize(Decimal('.1'), rounding=ROUND_HALF_UP))
+        self.logger.info("???????????????????????????????????????????calc_deltaStrong_byNumberTicks: result=" + str(result))
+
+        return result
+    #fin calc_deltaString_byNumberTicks
+
+
+
+    def getArrayNumberTicks(self, decData, _numberOfTicks=50):
+
+        arSize = np.size(decData.volumetotal_ndArray)
+        iStart = 0
+        if _numberOfTicks < arSize:
+            iStart = arSize - _numberOfTicks - 1
+        #
+
+        return decData.volumetotal_ndArray[iStart:]
+    #fin getArrayNumberTicks
 
 
 
@@ -446,23 +486,27 @@ class DataProcessor_dec(DataProcessor):
                 # positive vol == buy, negative vol == sell
                 self.logger.debug("Process __process_tickList: tick vol=" + str(decData.volume_ndArray_tmp[0, decData.arrays_index]))
 
+                ndarrNumberTicks = self.getArrayNumberTicks(decData, maxColNumber)
+
                 # CALC DELTA OF CURRENT CANDLE
                 period = 3
                 delta_dec = self.calc_delta(decData, period)
 
-                delta_dec2 = self.calc_delta_byNumberTicks(decData, maxColNumber)
+                delta_dec2 = self.calc_delta_byNumberTicks(decData, ndarrNumberTicks)
 
                 # CALC AVG VOL FROM THE LAST NUMBER OF TICKS
-                avg_vol_dec = self.calc_avgvol_byNumberTicks(decData, maxColNumber)
+                avg_vol_dec = self.calc_avgvol_byNumberTicks(decData, ndarrNumberTicks)
 
                 # CALC FILTERED VOLUME
-                vol_filtered = self.calc_volFiltered_currentcandle(decData)
-
-                # CALC DELTA STRONG OF CURRENT CANDLE
-                deltaStrong_dec = self.calc_deltaStrong_currentcandle(avg_vol_dec, delta_dec2)
+                #vol_filtered = self.calc_volFiltered_currentcandle(decData)
+                vol_filtered, ndarrFiltered = self.calc_volFiltered_byNumberTicks(decData, ndarrNumberTicks)
 
                 #SPEED
-                speed = self.calc_speedOfTape(decData, tickVol)
+                speed, speedT0 = self.calc_speedOfTape(decData, tickVol, decData.calculatedData_ndArray[5, decData.calculatedData_index])
+
+                # CALC DELTA STRONG OF CURRENT CANDLE
+                # deltaStrong_dec = self.calc_deltaStrong_currentcandle(avg_vol_dec, delta_dec2)
+                deltaStrong_dec = self.calc_deltaStrong_byNumberTicks(vol_filtered, ndarrFiltered, maxColNumber, speed)
 
                 #SAVE the data
                 decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
@@ -470,10 +514,7 @@ class DataProcessor_dec(DataProcessor):
                 decData.calculatedData_ndArray[2, decData.calculatedData_index] = deltaStrong_dec
                 decData.calculatedData_ndArray[3, decData.calculatedData_index] = delta_dec2
                 decData.calculatedData_ndArray[4, decData.calculatedData_index] = vol_filtered
-                currentSpeed = decData.calculatedData_ndArray[4, decData.calculatedData_index]
-                newSpeed = currentSpeed + speed
-                self.logger.info('??????? newSpeed: ' + str(newSpeed))
-                decData.calculatedData_ndArray[5, decData.calculatedData_index] = newSpeed
+                decData.calculatedData_ndArray[5, decData.calculatedData_index] = speedT0
 
                 decData.arrays_index += 1
                 self.logger.debug('Process __process_tickList: calculatedData_ndArray:' + repr(decData.calculatedData_ndArray))
@@ -504,7 +545,7 @@ class DataProcessor_dec(DataProcessor):
     def doProcess(self, _ticklistDict, _thetime, _market):
         """  return errormessage_list [str], last_ID <int> """
 
-        self.logger.info('***Method->doProcess tick list ' + _market + ' INIT')
+        self.logger.debug('***Method->doProcess tick list ' + _market + ' INIT')
 
         errormessage = '0'
         errormessage_list = []
@@ -522,7 +563,7 @@ class DataProcessor_dec(DataProcessor):
             errormessage = '++--++do Processing ticks Error: ' + repr(ex)
             errormessage_list.append(errormessage)
 
-        self.logger.info('***Method->doProcess tick list ' + _market + ' ENDS')
+        self.logger.debug('***Method->doProcess tick list ' + _market + ' ENDS')
         return errormessage_list, last_ID
     # fin doProcess
 # class

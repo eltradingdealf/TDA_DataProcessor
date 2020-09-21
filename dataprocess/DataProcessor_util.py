@@ -6,13 +6,8 @@
     @date Agosto 2017
 """
 #APIs imports
-import os
-from datetime import date, timedelta, datetime
-import time
-import pytz
-import string
-import math
 from decimal import Decimal, ROUND_HALF_UP
+import numpy as np
 
 #local Imports
 from common import Constantes
@@ -92,6 +87,25 @@ def calculatePositionArrayByTime_2M(_hour, _minute):
     return str(result)
 #fin calculatePositionArrayByTime_2M
 
+
+
+def calc_sbForDelta_byArr(_theArr):
+
+    result_S = 0
+    result_B = 0
+    arTmpSize = np.size(_theArr)
+
+    for x in range(0, arTmpSize):
+        v = _theArr[x]
+        if v >= 0:
+            result_B += v
+        else:
+            result_S += v
+        #
+    #
+
+    return result_S, result_B
+#fin calc_sbForDelta_byArr
 
 
 """

@@ -52,7 +52,7 @@ class Dec_mysql_Dao(iDecDAO):
     def getPrices_current(self, _curTimeInDate, _market):
         """ return result {'buy_price, 'sell_price'} """
 
-        self.logger.info("***Method->Dao-Dec->Getting prices Current "+ _market + " INIT")
+        self.logger.debug("***Method->Dao-Dec->Getting prices Current "+ _market + " INIT")
 
         errormessage = '0'
         result = {'sell_price':'0.0', 'buy_price':'0.0'}
@@ -105,7 +105,7 @@ class Dec_mysql_Dao(iDecDAO):
             #
         #
 
-        self.logger.info('***Method->Dao-Dec->Getting prices Current '+ _market + '  ENDS')
+        self.logger.debug('***Method->Dao-Dec->Getting prices Current '+ _market + '  ENDS')
         return errormessage, result
     #fin getPrices_current
 
@@ -126,14 +126,14 @@ class Dec_mysql_Dao(iDecDAO):
     def getListTicks_LastByID(self, _lastTick_id, _curTimeInDate, _market):
         """ errormessage, result [Tick_Dec] --> todos los ticks desde el ultimo """
 
-        self.logger.info("***Method->Dao-dec->Getting tick list(LAST-ID) INIT")
+        self.logger.debug("***Method->Dao-dec->Getting tick list(LAST-ID) INIT")
 
         errormessage = '0'
         result = []
         connection = None
 
         self.logger.debug('=====mysql, mysql_Query LAST_ID-> date:' + str(_curTimeInDate))
-        self.logger.info('=====mysql, mysql_Query LAST_ID-> _lastTick_id:' + str(_lastTick_id))
+        self.logger.debug('=====mysql, mysql_Query LAST_ID-> _lastTick_id:' + str(_lastTick_id))
 
         try:
             self.logger.debug('=====mysql, find_ID trap before conn')
@@ -190,7 +190,7 @@ class Dec_mysql_Dao(iDecDAO):
             #
         #
 
-        self.logger.info('***Method->Dao-ibex->Getting tick list(LAST-ID)('+str(len(result))+') ENDS')
+        self.logger.debug('***Method->Dao-ibex->Getting tick list(LAST-ID)('+str(len(result))+') ENDS')
         return errormessage, result
     #fin getListTicks_LastByID
 
@@ -208,7 +208,7 @@ class Dec_mysql_Dao(iDecDAO):
     def updateCalculatedData(self, __market, _calculatedData_ndArray, _index, _theTime):
         """ update Calculated data table for the market """
 
-        self.logger.info("***Method->Dao-dec->updateCalculatedData INIT " + str(_index))
+        self.logger.debug("***Method->Dao-dec->updateCalculatedData INIT " + str(_index))
 
         errormessage = '0'
         result = []
@@ -264,7 +264,7 @@ class Dec_mysql_Dao(iDecDAO):
             #
         #
 
-        self.logger.info("***Method->Dao-dec->updateCalculatedData ENDS")
+        self.logger.debug("***Method->Dao-dec->updateCalculatedData ENDS")
         return errormessage
     #fin updateCalculatedData
 
@@ -283,7 +283,7 @@ class Dec_mysql_Dao(iDecDAO):
     def updateGlobalData(self, _market, _decData, _theTime):
         """ update global data table for the market """
 
-        self.logger.info("***Method->Dao-dec->updateGlobalData INIT")
+        self.logger.debug("***Method->Dao-dec->updateGlobalData INIT")
 
         errormessage = '0'
         result = []
@@ -325,7 +325,7 @@ class Dec_mysql_Dao(iDecDAO):
             #
         #
 
-        self.logger.info("***Method->Dao-dec->updateGlobalData ENDS")
+        self.logger.debug("***Method->Dao-dec->updateGlobalData ENDS")
         return errormessage
     #fin updateGlobalData
 
@@ -339,7 +339,7 @@ class Dec_mysql_Dao(iDecDAO):
     def getSessions(self, _market):
         """ errormessage, result[int] --> todas sesiones """
 
-        self.logger.info('***Method->Dao-Dec->getSessions  '+ _market + ' INIT')
+        self.logger.debug('***Method->Dao-Dec->getSessions  '+ _market + ' INIT')
 
         errormessage = '0'
         result = []
@@ -384,7 +384,7 @@ class Dec_mysql_Dao(iDecDAO):
             #
         #
 
-        self.logger.info('***Method->Dao-Dec->getSessions('+str(len(result))+')  '+ _market + ' ENDS')
+        self.logger.debug('***Method->Dao-Dec->getSessions('+str(len(result))+')  '+ _market + ' ENDS')
         return errormessage, result
     #fin getSessions
 
