@@ -457,8 +457,6 @@ class DataProcessor_dec(DataProcessor):
         tckProcessed = 0
         decData = self.dataSingleton.decData
         decData.initArrays(_market)
-
-        maxColIndex = 0
         maxColNumber = Constantes.TICKS_BY_CANDLE[_market]
 
         for tick in _tickList:

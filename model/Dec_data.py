@@ -80,7 +80,7 @@ class Dec_data:
 
     def initArrays(self, __market):
 
-        self.logger.debug('***Method->initArrays  '+__market+' INIT')
+        self.logger.info('***Method->initArrays  '+__market+' INIT')
 
         self.logger.debug('***Method->initArrays  arrays_initialized='+str(self.arrays_initialized))
 
