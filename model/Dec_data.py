@@ -50,8 +50,6 @@ class Dec_data:
     speedT1                 = 0
     speedCurrent            = 0
 
-
-
     #---------------------------------------------
     ticks_array = [[]]
     ticks_array_tmp = []
@@ -59,6 +57,7 @@ class Dec_data:
     volume_ndArray = np.zeros((1, 1), dtype=int) #All the volume Ticks in a 2 dimensions array
     volume_ndArray_tmp = np.zeros(1, dtype=int)
     volumetotal_ndArray = np.zeros(1, dtype=int)  #Store all the volume ticks in a One Dimension array
+    deltaStrongFilteredtotal_ndArray = np.zeros(1, dtype=int)  #Stores all the delta strong filtered values
 
     arrays_initialized = False
     arrays_index = 0
@@ -67,13 +66,14 @@ class Dec_data:
     """
     row 0 -> vol delta
     row 1 -> vol avg
-    row 2 -> vol avg * vol delta
+    row 2 -> delta strong filtered
     row 3 -> vol delta Period
     row 4 -> vol Filtered
     row 5 -> Speed
+    row 6 -> avg Weight delta Strong filtered
     One col by candle
     """
-    calculatedData_ndArray = np.zeros((6, 1))
+    calculatedData_ndArray = np.zeros((7, 1))
     calculatedData_index = 0
     #---------------------------------------------
 
@@ -87,6 +87,7 @@ class Dec_data:
         if not self.arrays_initialized:
             self.logger.info('***Method->initArrays  arrays NOT initialized')
 
+            self.deltaStrongFilteredtotal_ndArray = np.zeros(1, dtype=int)
             self.volumetotal_ndArray = np.zeros(1, dtype=int)
             self.volume_ndArray = np.zeros((1, Constantes.TICKS_BY_CANDLE[__market]), dtype=int)
             self.volume_ndArray_tmp = np.zeros((1, Constantes.TICKS_BY_CANDLE[__market]), dtype=int)
@@ -110,7 +111,7 @@ class Dec_data:
         self.arrays_index = 0
 
         #New Col for Calculated data array
-        tmp = np.zeros((6, 1))
+        tmp = np.zeros((7, 1))
         self.calculatedData_ndArray = np.hstack((self.calculatedData_ndArray, tmp))
         self.calculatedData_index += 1
 

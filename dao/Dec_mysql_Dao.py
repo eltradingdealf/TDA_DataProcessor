@@ -10,17 +10,12 @@
 #APIs imports
 import logging
 import logging.config
-import time
-from decimal import *
-import numpy as np
+from decimal import Decimal, ROUND_HALF_UP
 import pymysql
 
 #local imports
-from dataprocess.DataProcessor import DataProcessor
 from dao.iDecDao import iDecDAO
-from model.Dec_data import Dec_data
 from model.Tick_Dec import Tick_Dec
-from common import Util
 from common import Constantes
 from common import query_sql
 import ConfigRoot
@@ -248,7 +243,8 @@ class Dec_mysql_Dao(iDecDAO):
                                     str(_calculatedData_ndArray[2, _index]),
                                     str(_calculatedData_ndArray[3, _index]),
                                     str(_calculatedData_ndArray[4, _index]),
-                                    str(_calculatedData_ndArray[5, _index])))
+                                    str(_calculatedData_ndArray[5, _index]),
+                                    str(_calculatedData_ndArray[6, _index])))
             #
             self.logger.debug('=====mysql, SQL_INSERT_UPDATE_CALCULATED_DATA_Fxxx query executed')
 
