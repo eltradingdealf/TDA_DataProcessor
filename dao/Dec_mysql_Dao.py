@@ -244,7 +244,9 @@ class Dec_mysql_Dao(iDecDAO):
                                     str(_calculatedData_ndArray[3, _index]),
                                     str(_calculatedData_ndArray[4, _index]),
                                     str(_calculatedData_ndArray[5, _index]),
-                                    str(_calculatedData_ndArray[6, _index])))
+                                    str(_calculatedData_ndArray[6, _index]),
+                                    str(_calculatedData_ndArray[7, _index]),
+                                    str(_calculatedData_ndArray[8, _index])))
             #
             self.logger.debug('=====mysql, SQL_INSERT_UPDATE_CALCULATED_DATA_Fxxx query executed')
 
