@@ -61,7 +61,7 @@ class ETDA_Dec_Engine:
     """
     def __getTickListsFromDB(self, _last_tick_id, _curTimeInDate, _curDatetime, _market):
         """ errormessage, result[ticklist_ID] with the Tick's List"""
-        self.logger.info('***Method->__getTickListsFromDB '+_market+' INIT')
+        self.logger.debug('***Method->__getTickListsFromDB '+_market+' INIT')
 
         errormessage1 = '0'
         errormessage  = '0'
@@ -86,7 +86,7 @@ class ETDA_Dec_Engine:
             errormessage = errormessage + ' - ' + '++--++Error In  '+_market+' __getTickListsFromDB LAST-ID: ' + repr(ex)
         #
 
-        self.logger.info('***Method->__getTickListsFromDB '+_market+' ENDS')
+        self.logger.debug('***Method->__getTickListsFromDB '+_market+' ENDS')
         return errormessage, result
     # fin __getTickListsFromDB
 
@@ -94,7 +94,7 @@ class ETDA_Dec_Engine:
 
     def __updateCurrentPrices(self, _curTimeInDate, _market):
         
-        self.logger.info('***Method->__updateCurrentPrices '+_market+' INIT')
+        self.logger.debug('***Method->__updateCurrentPrices '+_market+' INIT')
 
         try:
             dao_mysql = Dec_mysql_Dao()
@@ -112,7 +112,7 @@ class ETDA_Dec_Engine:
             self.logger.error(errormessage + ' - ' + '++--++Error In Decimal future  '+_market+'  __updateCurrentPrices: ' + repr(ex))
         #
 
-        self.logger.info('***Method->__updateCurrentPrices '+_market+' ENDS')
+        self.logger.debug('***Method->__updateCurrentPrices '+_market+' ENDS')
     # fin __updateCurrentPrices
 
 
@@ -229,7 +229,7 @@ class ETDA_Dec_Engine:
         current_calendar_key = Util.getCurrentCalendarKey()
         self.logger.debug('current_calendar_key========' + current_calendar_key)
         today_calendar = MyCalendar.thecalendar_FuturesCME[current_calendar_key]
-        self.logger.info('today_calendar==============' + repr(today_calendar))
+        self.logger.debug('today_calendar==============' + repr(today_calendar))
         
         """
         today_calendar [openmarket str<Y/N/F>, 
@@ -315,7 +315,7 @@ class ETDA_Dec_Engine:
                
 
                 # INIT ITERATION WAITING A TIME'S INTERVAL
-                self.logger.info('***LOOP*** INIT ITERATION, Awaiting 0.5 secs')
+                self.logger.debug('***LOOP*** INIT ITERATION, Awaiting 0.5 secs')
                 time.sleep(Constantes.TIME_LOOP_TOSLEEP)
                 self.logger.info('***LOOP*** ITERATION STARTED')
 
@@ -328,7 +328,7 @@ class ETDA_Dec_Engine:
                 if '0' != errMesgGetTicks:
                     getTicksErrorMsgList.append(errMesgGetTicks)
                 #
-                self.logger.info('***LOOP*** **TIME TRAP: QUERY DB ends')
+                self.logger.debug('***LOOP*** **TIME TRAP: QUERY DB ends')
 
 
 
@@ -344,12 +344,12 @@ class ETDA_Dec_Engine:
                     # Si no ha habido nuevos Ticks, actualizamos el precio actual.
                     self.__updateCurrentPrices(thetime['intDate'], _market)
                 #
-                self.logger.info('***LOOP*** **TIME TRAP: PROCESS DATA('+str(last_tick_id)+') ends')
+                self.logger.debug('***LOOP*** **TIME TRAP: PROCESS DATA('+str(last_tick_id)+') ends')
 
               
 
                 # STORE CALCULATED DATA INTO BROKER DATABASE
-                self.logger.info('***LOOP***  **TIME TRAP **STORING CALCULATED DATA(calculatedData_index_last:'+str(calculatedData_index_last)+', decData.calculatedData_index:'+str(decData.calculatedData_index)+') init')
+                self.logger.debug('***LOOP***  **TIME TRAP **STORING CALCULATED DATA(calculatedData_index_last:'+str(calculatedData_index_last)+', decData.calculatedData_index:'+str(decData.calculatedData_index)+') init')
                 while calculatedData_index_last <= decData.calculatedData_index:
 
                     dao_mysql.updateCalculatedData(_market, decData.calculatedData_ndArray, calculatedData_index_last, thetime)
