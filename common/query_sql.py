@@ -405,7 +405,7 @@ SQL_INSERT_UPDATE_CALCULATED_DATA_SP500 =      """   INSERT INTO trading_db.visu
 
 SQL_INSERT_UPDATE_CALCULATED_DATA_NASDAQ =      """   INSERT INTO trading_db.visu_datacalc_fnasdaq 
                                                       (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04, data05, data06
-                                                      , data07, data08)) 
+                                                      , data07, data08)
                                                       VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
                                                       ON DUPLICATE KEY UPDATE 
                                                       sessiondate=VALUES(sessiondate), candle_id=VALUES(candle_id), delta=VALUES(delta), 
@@ -417,11 +417,11 @@ SQL_INSERT_UPDATE_CALCULATED_DATA_NASDAQ =      """   INSERT INTO trading_db.vis
 
 SQL_INSERT_UPDATE_CALCULATED_DATA_DAX =         """   INSERT INTO trading_db.visu_datacalc_dax 
                                                       (sessiondate, candle_id, delta, vol_avg, delta_strong, data03, data04, data05, data06
-                                                      , data07, data08)) 
+                                                      , data07, data08)
                                                       VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
                                                       ON DUPLICATE KEY UPDATE 
                                                       sessiondate=VALUES(sessiondate), candle_id=VALUES(candle_id), delta=VALUES(delta), 
                                                       vol_avg=VALUES(vol_avg), delta_strong=VALUES(delta_strong), data03=VALUES(data03),
                                                       data04=VALUES(data04), data05=VALUES(data05), data06=VALUES(data06)
-                                                      , data07=VALUES(data07), data08=VALUES(data08)             
+                                                      , data07=VALUES(data07), data08=VALUES(data08)
                                                 """
