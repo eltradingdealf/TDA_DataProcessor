@@ -89,6 +89,20 @@ class MainApp(cmd.Cmd):
         self.decimal_DataProcess.dowork(market)
     #do_init_sp500
 
+    """
+    * Start reading and sending data for S&P500.
+    """
+    def do_init_bund(self, arg):
+        'Starts Process reading and sending data for BUND'  # Comment for commands help
+
+        self.logger.info('Main.do_start->Starting proccess')
+
+        self.spc.stopProcessFlag = False
+        market = Constantes.MARKET_BUND
+
+        self.decimal_DataProcess.dowork(market)
+
+    # do_init_bund
 
     """
     * Start reading and sending data for Euro-FX.

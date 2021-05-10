@@ -130,9 +130,9 @@ class Dec_data:
             vt_size = np.size(self.volumetotal_ndArray)
             if vt_size > maxElementNumber:
                 self.volumetotal_ndArray = np.delete(self.volumetotal_ndArray, 0)
-                self.logger.info('***Method->************************************************DELETE A')
+                self.logger.debug('***Method->************************************************DELETE A')
             else:
-                self.logger.info('***Method->************************************************BREAK A')
+                self.logger.debug('***Method->************************************************BREAK A')
                 break;
             #if
         #while
@@ -141,9 +141,9 @@ class Dec_data:
             dsf_size = np.size(self.deltaStrongFilteredtotal_ndArray)
             if dsf_size > maxElementNumber:
                 self.deltaStrongFilteredtotal_ndArray = np.delete(self.deltaStrongFilteredtotal_ndArray, 0)
-                self.logger.info('***Method->************************************************DELETE B')
+                self.logger.debug('***Method->************************************************DELETE B')
             else:
-                self.logger.info('***Method->************************************************BREAK B')
+                self.logger.debug('***Method->************************************************BREAK B')
                 break;
             #if
         #while
@@ -152,9 +152,9 @@ class Dec_data:
             ds_size = np.size(self.deltaStrongtotal_ndArray)
             if ds_size > maxElementNumber:
                 self.deltaStrongtotal_ndArray = np.delete(self.deltaStrongtotal_ndArray, 0)
-                self.logger.info('***Method->************************************************DELETE C')
+                self.logger.debug('***Method->************************************************DELETE C')
             else:
-                self.logger.info('***Method->************************************************BREAK C')
+                self.logger.debug('***Method->************************************************BREAK C')
                 break;
             #if
         #while
