@@ -5,6 +5,7 @@
     @author Alfredo Sanz
     @date Febrero 2017
     @update Sept 2020
+    @update May 2021
 """
 #APIs imports
 
@@ -38,6 +39,7 @@ MARKET_SP500    =   "SP500"
 MARKET_NASDAQ   =   "NASDAQ"
 MARKET_DAX      =   "DAX"
 MARKET_CL       =   "CL"
+MARKET_BUND     =   "BUND"
 
 
 WEB_URL_EXPLORE_LOCALHOST               = "http://localhost:8080/etda/api/v1/explore"
@@ -67,9 +69,9 @@ INIT_TRADING_TIME_HOUR_INTEGER      = 80000
 HOUR_BACKUP_SESSIONS        = 7
 
 #--------TICK CANDLE SETUP------------
-TICKS_BY_CANDLE = {"EUROFX": 75, "SP500": 90, "NASDAQ": 75, "DAX": 45, "CL": 75}
+TICKS_BY_CANDLE = {"EUROFX": 75, "SP500": 90, "NASDAQ": 75, "DAX": 45, "CL": 75, "BUND": 99}
 
-VOL_FILTER_TRESHOLD = {"EUROFX": 10, "SP500": 25, "NASDAQ": 25, "DAX": 3, "CL": 10}
+VOL_FILTER_TRESHOLD = {"EUROFX": 10, "SP500": 25, "NASDAQ": 25, "DAX": 3, "CL": 10, "BUND": 10}
 
 
 
