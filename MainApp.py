@@ -118,6 +118,21 @@ class MainApp(cmd.Cmd):
         self.decimal_DataProcess.dowork(market)
     #do_init_dax
 
+    """
+       * Start reading and sending data for EuroStoxx50.
+       """
+
+    def do_init_stoxx50(self, arg):
+        'Starts Process reading and sending data for STOXX50'  # Comment for commands help
+
+        self.logger.info('Main.do_start->Starting proccess')
+
+        self.spc.stopProcessFlag = False
+        market = Constantes.MARKET_STOXX50
+
+        self.decimal_DataProcess.dowork(market)
+    # do_init_stoxx50
+
 
     """
     * Exit App

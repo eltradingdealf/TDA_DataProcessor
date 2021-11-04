@@ -557,6 +557,9 @@ class DataProcessor_dec(DataProcessor):
                 deltaStrongFiltered_dec = self.calc_deltaStrongFiltered_byNumberTicks(decData, vol_filtered, ndarrFiltered, maxColNumber, speed)
                 deltaStrongFiltered_WeightAvg_dec = self.calc_deltaStrongFilteredWeightedAvg_byNumberTicks(decData, maxColNumber)
 
+                #CALC Speed Delta Vol
+
+
                 #SAVE the data
                 decData.calculatedData_ndArray[0, decData.calculatedData_index] = delta_dec
                 decData.calculatedData_ndArray[1, decData.calculatedData_index] = avg_vol_dec
