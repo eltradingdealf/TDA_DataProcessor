@@ -5,6 +5,7 @@
     @author Alfredo Sanz
     @date Marzo 2019
     @update Sept 2020
+    @update Nov 2021
 """
 
 #APIs imports
@@ -79,6 +80,8 @@ class Dec_mysql_Dao(iDecDAO):
                     sql = query_sql.GET_CURRENT_PRICES_DAX
                 elif Constantes.MARKET_BUND == _market:
                     sql = query_sql.GET_CURRENT_PRICES_BUND
+                elif Constantes.MARKET_STOXX50 == _market:
+                    sql = query_sql.GET_CURRENT_PRICES_STOXX50
                 #
 
                 cursor.execute(sql, (_curTimeInDate))
@@ -156,6 +159,8 @@ class Dec_mysql_Dao(iDecDAO):
                     sql = query_sql.GET_LAST_TICKS_BY_ID_LIST_DAX
                 elif Constantes.MARKET_BUND == _market:
                     sql = query_sql.GET_LAST_TICKS_BY_ID_LIST_BUND
+                elif Constantes.MARKET_STOXX50 == _market:
+                    sql = query_sql.GET_LAST_TICKS_BY_ID_LIST_STOXX50
                 #
 
                 cursor.execute(sql, (_curTimeInDate, _lastTick_id))
@@ -237,6 +242,8 @@ class Dec_mysql_Dao(iDecDAO):
                 sql = query_sql.SQL_INSERT_UPDATE_CALCULATED_DATA_DAX
             elif Constantes.MARKET_BUND == __market:
                 sql = query_sql.SQL_INSERT_UPDATE_CALCULATED_DATA_BUND
+            elif Constantes.MARKET_STOXX50 == __market:
+                sql = query_sql.SQL_INSERT_UPDATE_CALCULATED_DATA_STOXX50
             #
             
             self.logger.debug('=====mysql, _calculatedData_ndArray=' + repr(_calculatedData_ndArray))
@@ -370,6 +377,8 @@ class Dec_mysql_Dao(iDecDAO):
                     sql = query_sql.GET_SESSION_LIST_DAX
                 elif Constantes.MARKET_BUND == _market:
                     sql = query_sql.GET_SESSION_LIST_BUND
+                elif Constantes.MARKET_STOXX50 == _market:
+                    sql = query_sql.GET_SESSION_LIST_STOXX50
                 #
 
                 cursor.execute(sql)
@@ -425,6 +434,8 @@ class Dec_mysql_Dao(iDecDAO):
                 sql_delete = query_sql.DELETE_TICKS_DEC_DAX
             elif Constantes.MARKET_BUND == _market:
                 sql_delete = query_sql.DELETE_TICKS_DEC_BUND
+            elif Constantes.MARKET_STOXX50 == _market:
+                sql_delete = query_sql.DELETE_TICKS_DEC_STOXX50
             #
 
             cursor2 = connection.cursor()
@@ -462,6 +473,8 @@ class Dec_mysql_Dao(iDecDAO):
                 sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_DAX
             elif Constantes.MARKET_BUND == _market:
                 sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_BUND
+            elif Constantes.MARKET_STOXX50 == _market:
+                sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_STOXX50
             #
 
             cursor2 = connection.cursor()
@@ -522,10 +535,18 @@ class Dec_mysql_Dao(iDecDAO):
                 query_ct = query_sql.CREATE_TABLE_BACKUP_TICKS_DEC_NASDAQ_01
                 query_ct += str(_idSesion)         
                 query_ct += query_sql.CREATE_TABLE_BACKUP_TICKS_DEC_NASDAQ_02
+            elif Constantes.MARKET_DAX == _market:
+                query_ct = query_sql.CREATE_TABLE_BACKUP_TICKS_DEC_DAX_01
+                query_ct += str(_idSesion)
+                query_ct += query_sql.CREATE_TABLE_BACKUP_TICKS_DEC_DAX_02
             elif Constantes.MARKET_BUND == _market:
                 query_ct = query_sql.CREATE_TABLE_BACKUP_TICKS_DEC_BUND_01
                 query_ct += str(_idSesion)
                 query_ct += query_sql.CREATE_TABLE_BACKUP_TICKS_DEC_BUND_02
+            elif Constantes.MARKET_STOXX50 == _market:
+                query_ct = query_sql.CREATE_TABLE_BACKUP_TICKS_DEC_STOXX50_01
+                query_ct += str(_idSesion)
+                query_ct += query_sql.CREATE_TABLE_BACKUP_TICKS_DEC_STOXX50_02
             #
 
             cursor = connection.cursor()
@@ -565,10 +586,18 @@ class Dec_mysql_Dao(iDecDAO):
                 query_ins_sel = query_sql.SELECT_INSERT_TICKS_BACKP_DEC_NASDAQ__01
                 query_ins_sel += str(_idSesion)
                 query_ins_sel += query_sql.SELECT_INSERT_TICKS_BACKP_DEC_NASDAQ__02
+            elif Constantes.MARKET_DAX == _market:
+                query_ins_sel = query_sql.SELECT_INSERT_TICKS_BACKP_DEC_DAX_01
+                query_ins_sel += str(_idSesion)
+                query_ins_sel += query_sql.SELECT_INSERT_TICKS_BACKP_DEC_DAX_02
             elif Constantes.MARKET_BUND == _market:
                 query_ins_sel = query_sql.SELECT_INSERT_TICKS_BACKP_DEC_BUND_01
                 query_ins_sel += str(_idSesion)
                 query_ins_sel += query_sql.SELECT_INSERT_TICKS_BACKP_DEC_BUND_02
+            elif Constantes.MARKET_STOXX50 == _market:
+                query_ins_sel = query_sql.SELECT_INSERT_TICKS_BACKP_DEC_STOXX50_01
+                query_ins_sel += str(_idSesion)
+                query_ins_sel += query_sql.SELECT_INSERT_TICKS_BACKP_DEC_STOXX50_02
             #        
            
             cursor = connection.cursor()
@@ -603,8 +632,12 @@ class Dec_mysql_Dao(iDecDAO):
                 sql_delete = query_sql.DELETE_TICKS_BY_SESION_DEC_SP500
             elif Constantes.MARKET_NASDAQ == _market:
                 sql_delete = query_sql.DELETE_TICKS_BY_SESION_DEC_NASDAQ
+            elif Constantes.MARKET_DAX == _market:
+                sql_delete = query_sql.DELETE_TICKS_BY_SESION_DEC_DAX
             elif Constantes.MARKET_BUND == _market:
                 sql_delete = query_sql.DELETE_TICKS_BY_SESION_DEC_BUND
+            elif Constantes.MARKET_STOXX50 == _market:
+                sql_delete = query_sql.DELETE_TICKS_BY_SESION_DEC_STOXX50
             #
 
             cursor2 = connection.cursor()
@@ -640,8 +673,12 @@ class Dec_mysql_Dao(iDecDAO):
                 sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_SP500
             elif Constantes.MARKET_NASDAQ == _market:
                 sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_NASDAQ
+            elif Constantes.MARKET_DAX == _market:
+                sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_DAX
             elif Constantes.MARKET_BUND == _market:
                 sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_BUND
+            elif Constantes.MARKET_STOXX50 == _market:
+                sql_delete_02 = query_sql.DELETE_VISU_CALCULATED_DATA_STOXX50
             #
 
             cursor2 = connection.cursor()
